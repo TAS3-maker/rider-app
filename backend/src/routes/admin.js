@@ -236,6 +236,10 @@ async function mapGroup(g) {
     capacity: g.capacity || 4, memberCount: members.length, vehicleCapacity: g.vehicleCapacity || 4,
     bookerName: (members.find((m) => String(m.user?._id) === String(g.bookerId)) || {}).user?.name || '',
     pickupMode: g.pickupMode || 'meet_point',
+    flags: {
+      delayed: !!g.delayed, bookingInfoMissing: !!g.bookingInfoMissing, rematchNeeded: !!g.rematchNeeded,
+      adminFlag: !!g.adminFlag, noBookerFlag: !!g.noBookerFlag, cabCancelled: !!g.cabCancelled,
+    },
     riders: members.map((m) => {
       const sh = shareOf(m.user?._id);
       return {
@@ -514,8 +518,8 @@ router.get('/resolutions', async (req, res, next) => {
     ]);
     const fareIds = fareGroups.map((g) => g.fareRecord);
     const fares = await FareRecord.find({ _id: { $in: fareIds } }).lean();
-    const paymentDisputes = fares.filter((f) => (f.shares || []).some((s) => s.overdue)).map((f) => ({ id: String(f.group), fareId: String(f._id), overdueCount: (f.shares || []).filter((s) => s.overdue).length }));
-    const fareDisputes = fares.filter((f) => f.fareChanged).map((f) => ({ id: String(f.group), fareId: String(f._id), totalCost: f.totalCost }));
+    const paymentDisputes = fares.filter((f) => f.paymentDisputed || (f.shares || []).some((s) => s.overdue)).map((f) => ({ id: String(f.group), fareId: String(f._id), disputed: !!f.paymentDisputed, overdueCount: (f.shares || []).filter((s) => s.overdue).length }));
+    const fareDisputes = fares.filter((f) => f.fareDisputed || f.fareChanged).map((f) => ({ id: String(f.group), fareId: String(f._id), disputed: !!f.fareDisputed, totalCost: f.totalCost }));
     const map = async (g) => await mapGroup(g);
     res.json({
       bookerNeeded: await Promise.all(bookerNeeded.map(map)),
@@ -538,9 +542,9 @@ router.post('/resolutions/:kind/:groupId/resolve', async (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.groupId)) return res.status(400).json({ error: 'Invalid id' });
     const g = await RideGroup.findById(req.params.groupId);
     if (!g) return res.status(404).json({ error: 'Group not found' });
-    if (req.params.kind === 'missing-info') g.adminFlag = false;
-    if (req.params.kind === 'fare' && g.fareRecord) await FareRecord.updateOne({ _id: g.fareRecord }, { $set: { fareChanged: false } });
-    if (req.params.kind === 'payment' && g.fareRecord) await FareRecord.updateOne({ _id: g.fareRecord }, { $set: { 'shares.$[].overdue': false } });
+    if (req.params.kind === 'missing-info') { g.adminFlag = false; g.bookingInfoMissing = false; }
+    if (req.params.kind === 'fare' && g.fareRecord) await FareRecord.updateOne({ _id: g.fareRecord }, { $set: { fareChanged: false, fareDisputed: false } });
+    if (req.params.kind === 'payment' && g.fareRecord) await FareRecord.updateOne({ _id: g.fareRecord }, { $set: { paymentDisputed: false, 'shares.$[].overdue': false } });
     await g.save();
     await EventLog.create({ type: 'ride_status_changed', actor: req.user._id, group: g._id, message: `Admin resolved ${req.params.kind} for group` });
     res.json({ message: 'resolved' });

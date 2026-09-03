@@ -135,6 +135,9 @@ async function joinGroup(group, ride, userId) {
     throw err;
   }
   await addRider(group, ride, userId);
+  // If a fare was already finalized (e.g. group re-opened after a cab cancel), flag it stale.
+  const staleFare = await FareRecord.findOne({ group: group._id, finalized: true });
+  if (staleFare && !staleFare.fareChanged) { staleFare.fareChanged = true; await staleFare.save(); }
   await logEvent(EVENT_LOG_TYPE.RIDER_JOINED, { actor: userId, ride: ride._id, group: group._id, message: 'Rider joined' });
   await logEvent(EVENT_LOG_TYPE.RIDE_MATCHED, { actor: userId, ride: ride._id, group: group._id });
   const user = await User.findById(userId).lean();
@@ -243,7 +246,13 @@ async function bookGroup(group, actorId) {
   if (BOOKED.includes(group.status)) return group;
   group.status = GROUP_STATUS.CONFIRMED;
   group.bookedAt = new Date();
+  const bookerRide = await Ride.findOne({ group: group._id, student: group.bookerId }).lean();
+  group.bookingInfoMissing = !bookerRide || !bookerRide.flightInfo || !bookerRide.pickupLocation;
   await group.save();
+  if (group.bookingInfoMissing) {
+    await RideGroup.updateOne({ _id: group._id }, { $set: { adminFlag: true } });
+    await logEvent(EVENT_LOG_TYPE.GROUP_STATUS_CHANGED, { actor: actorId, group: group._id, message: 'Booked but booking info incomplete' });
+  }
   await Ride.updateMany({ group: group._id }, { $set: { status: RIDE_STATUS.CONFIRMED } });
   await logEvent(EVENT_LOG_TYPE.GROUP_BOOKED, { actor: actorId, group: group._id, message: 'Cab booked' });
   await notifyMembers(group._id, {
@@ -335,6 +344,11 @@ async function confirmPayment(group, userId, actorId) {
 }
 
 async function completeGroup(group, actorId) {
+  if (TERMINAL.includes(group.status)) {
+    const err = new Error(`Cannot complete a ${group.status} group`);
+    err.status = 409;
+    throw err;
+  }
   group.status = GROUP_STATUS.COMPLETED;
   group.completedAt = new Date();
   await group.save();
@@ -361,6 +375,46 @@ async function cancelGroup(group, reason, actorId) {
     body: reason || 'Your ride group was cancelled.',
   });
   return group;
+}
+
+// Ride reaches pickup time — move the confirmed cab into progress.
+async function startGroup(group, actorId) {
+  if (group.status !== GROUP_STATUS.CONFIRMED) {
+    const err = new Error('Only a booked group can be started');
+    err.status = 409;
+    throw err;
+  }
+  group.status = GROUP_STATUS.IN_PROGRESS;
+  group.startedAt = new Date();
+  await group.save();
+  await Ride.updateMany({ group: group._id }, { $set: { status: RIDE_STATUS.IN_PROGRESS } });
+  await logEvent(EVENT_LOG_TYPE.RIDE_STATUS_CHANGED, { actor: actorId, group: group._id, message: 'Ride in progress (pickup time reached)' });
+  await notifyMembers(group._id, { type: NOTIFICATION_TYPE.RIDE_REMINDER, title: 'Ride starting', body: 'Your ride is now in progress. Head to the pickup point.' });
+  return group;
+}
+
+// Driver delayed — flag + notify riders (no status change).
+async function markDelayed(group, actorId) {
+  group.delayed = true;
+  await group.save();
+  await logEvent(EVENT_LOG_TYPE.RIDE_STATUS_CHANGED, { actor: actorId, group: group._id, message: 'Driver reported delayed' });
+  await notifyMembers(group._id, { type: NOTIFICATION_TYPE.RIDE_REMINDER, title: 'Driver delayed', body: 'Your driver is running late. Hang tight.' });
+  return group;
+}
+
+// Booker/admin removes a rider for non-payment.
+async function removeRider(group, targetUserId, actorId) {
+  const member = await GroupMember.findOne({ group: group._id, user: targetUserId, isActive: true });
+  if (!member) {
+    const err = new Error('That rider is not active in this group');
+    err.status = 404;
+    throw err;
+  }
+  member.removedForNonPayment = true;
+  await member.save();
+  await leaveGroup(group, targetUserId);
+  await logEvent(EVENT_LOG_TYPE.RIDER_LEFT, { actor: actorId, group: group._id, message: `Rider ${targetUserId} removed for non-payment` });
+  return RideGroup.findById(group._id);
 }
 
 async function markCabCancelled(group, actorId) {
@@ -439,6 +493,8 @@ async function serializeGroup(groupId, currentUserId) {
     noBookerFlag: group.noBookerFlag,
     cabCancelled: group.cabCancelled,
     rematchNeeded: group.rematchNeeded,
+    delayed: !!group.delayed,
+    bookingInfoMissing: !!group.bookingInfoMissing,
     members: memberViews,
     fare: fare
       ? {
@@ -472,6 +528,9 @@ module.exports = {
   completeGroup,
   cancelGroup,
   markCabCancelled,
+  startGroup,
+  markDelayed,
+  removeRider,
   serializeGroup,
   initials,
   logEvent,

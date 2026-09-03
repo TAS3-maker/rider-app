@@ -25,6 +25,8 @@ const fareRecordSchema = new mongoose.Schema(
 
     finalized: { type: Boolean, default: false },
     fareChanged: { type: Boolean, default: false },
+    paymentDisputed: { type: Boolean, default: false },
+    fareDisputed: { type: Boolean, default: false },
     enteredAt: { type: Date },
   },
   { timestamps: true }

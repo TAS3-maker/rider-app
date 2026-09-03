@@ -1,6 +1,7 @@
 const { RideGroup, FareRecord } = require('../models');
 const { ROLES } = require('../config/constants');
 const groupService = require('../services/groupService');
+const notificationService = require('../services/notificationService');
 
 async function enter(req, res, next) {
   try {
@@ -46,4 +47,31 @@ async function confirm(req, res, next) {
   }
 }
 
-module.exports = { enter, get, confirm };
+async function dispute(req, res, next) {
+  try {
+    const group = await RideGroup.findById(req.params.groupId);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    const kind = req.body.kind === 'fare' ? 'fare' : 'payment';
+    const fare = await FareRecord.findOne({ group: group._id });
+    if (!fare) return res.status(400).json({ error: 'No fare has been entered yet' });
+    if (kind === 'fare') fare.fareDisputed = true;
+    else fare.paymentDisputed = true;
+    await fare.save();
+    await RideGroup.updateOne({ _id: group._id }, { $set: { adminFlag: true } });
+    await groupService.logEvent('fare_confirmation', { actor: req.user._id, group: group._id, message: `${kind} disputed` });
+    if (group.bookerId) {
+      await notificationService.notify(group.bookerId, {
+        type: 'fare_confirmation',
+        title: kind === 'fare' ? 'Fare disputed' : 'Payment disputed',
+        body: 'A rider flagged a dispute. An admin will review it.',
+        data: { groupId: group._id },
+      });
+    }
+    res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message });
+    next(e);
+  }
+}
+
+module.exports = { enter, get, confirm, dispute };

@@ -17,6 +17,7 @@ const groupMemberSchema = new mongoose.Schema(
     leftAt: { type: Date },
     // True when a rider leaves after the cab was already booked (still owes their share).
     leftAfterBooking: { type: Boolean, default: false },
+    removedForNonPayment: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

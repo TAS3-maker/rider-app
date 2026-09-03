@@ -14,5 +14,8 @@ router.post('/:id/book', c.book);
 router.post('/:id/complete', c.complete);
 router.post('/:id/cancel', c.cancel);
 router.post('/:id/cab-cancelled', c.cabCancelled);
+router.post('/:id/start', c.start);
+router.post('/:id/delay', c.delay);
+router.post('/:id/remove-rider', c.removeRider);
 
 module.exports = router;

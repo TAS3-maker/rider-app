@@ -146,6 +146,45 @@ async function complete(req, res, next) {
     await chatService.postSystem(group._id, 'Ride marked complete');
     res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
   } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message });
+    next(e);
+  }
+}
+
+async function start(req, res, next) {
+  try {
+    const group = await RideGroup.findById(req.params.id);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    if (!bookerOnly(group, req, res)) return;
+    await groupService.startGroup(group, req.user._id);
+    res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message });
+    next(e);
+  }
+}
+
+async function delay(req, res, next) {
+  try {
+    const group = await RideGroup.findById(req.params.id);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    if (!bookerOnly(group, req, res)) return;
+    await groupService.markDelayed(group, req.user._id);
+    res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
+  } catch (e) {
+    next(e);
+  }
+}
+
+async function removeRider(req, res, next) {
+  try {
+    const group = await RideGroup.findById(req.params.id);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    if (!bookerOnly(group, req, res)) return;
+    await groupService.removeRider(group, req.body?.userId, req.user._id);
+    res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message });
     next(e);
   }
 }
@@ -174,4 +213,4 @@ async function cabCancelled(req, res, next) {
   }
 }
 
-module.exports = { browse, getGroup, create, join, leave, setBooker, book, complete, cancel, cabCancelled };
+module.exports = { browse, getGroup, create, join, leave, setBooker, book, complete, cancel, cabCancelled, start, delay, removeRider };

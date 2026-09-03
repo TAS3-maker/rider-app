@@ -113,6 +113,24 @@ multi-language, external CRM.
 - Note: admin lists return arrays (existing client-side pagination preserved) but accept
   ?page&limit and are capped; admin Sidebar icons are the pre-existing UI (untouched this phase).
 
+## Implemented (2026-09-03) — Phase 5: Hardening, tests & prod prep
+- Verified/hardened all 28 SOW side-flows. Added: group `start`(→in_progress at pickup time),
+  `delay` (driver delayed), `remove-rider` (non-payment) endpoints; fare `dispute`
+  (payment/fare) endpoint; flags RideGroup.delayed/bookingInfoMissing/startedAt,
+  FareRecord.paymentDisputed/fareDisputed, GroupMember.removedForNonPayment; lifecycle
+  transition guards (409 on illegal transitions, 403 non-booker); stale-fare flag on rejoin;
+  booking-info-missing detection on book; admin resolutions clear the new flags; group DTOs
+  surface flags for admin + mobile banners.
+- Automated tests: /app/backend/tests/api.test.js (Node runner, `npm test`, 10/10) covering
+  auth, ride creation, matching, capacity, join/leave, lifecycle, fare split, ratings, admin CRUD.
+- Verified by testing agent: 21/21 (10 Node + 11 pytest edge-case scenarios).
+- Prod config: backend/.env.example (full var list, rotate JWT_SECRET), ridepact/DEPLOYMENT.md
+  (backend/mobile/admin build + env + Publish flow). Note: environment ships Expo SDK 57
+  (not 54) to keep preview + EAS builds working; mobile source is JS (.jsx).
+- Wireframe parity: mobile screens match design tokens/layout; admin panel matches its supplied
+  wireframe. Known deviation: admin sidebar uses the pre-existing emoji glyphs from the supplied
+  admin codebase (left untouched per "do not redesign admin UI").
+
 ## Backlog (next phases per SOW)
 ### Phase 1 (finish Foundation)
 - P1: Profile edit screen (mobile) wired to PATCH /users/me; admin university/domain CRUD UI.

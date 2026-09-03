@@ -44,6 +44,7 @@ const rideGroupSchema = new mongoose.Schema(
     currency: { type: String, default: 'USD' },
 
     bookedAt: { type: Date },
+    startedAt: { type: Date },
     completedAt: { type: Date },
     cancelledAt: { type: Date },
     cancelReason: { type: String, default: '' },
@@ -51,6 +52,8 @@ const rideGroupSchema = new mongoose.Schema(
     // Edge-case flags.
     noBookerFlag: { type: Boolean, default: false },
     adminFlag: { type: Boolean, default: false },
+    delayed: { type: Boolean, default: false },
+    bookingInfoMissing: { type: Boolean, default: false },
     cabCancelled: { type: Boolean, default: false },
     rematchNeeded: { type: Boolean, default: false },
   },
