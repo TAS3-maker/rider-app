@@ -79,7 +79,10 @@ BASE=http://localhost:8500/api npm test
 
 **Default logins** (created by the seed):
 - Admin: `admin@ridepact.com` / `Admin@12345`
-- Students: register in the app with any `@university.edu` email (the verification code is returned in the response while `DEV_MODE=true`).
+- Demo students (pre-verified — log straight into the mobile app): `student@university.edu` / `Student@12345` and `taylor@university.edu` / `Student@12345`
+- Or register your own with any `@university.edu` email (the verification code is returned in the response while `DEV_MODE=true`).
+
+> Re-seed anytime with `npm run seed` (backend) or `yarn seed` from the `frontend/` folder.
 
 ---
 

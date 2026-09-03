@@ -84,6 +84,34 @@ const { ROLES } = require('../src/config/constants');
     `[seed] admin ensured: ${email} ${result.upsertedCount ? '(created)' : '(already existed — password unchanged)'}`
   );
 
+  // Demo students so you can log into the mobile app right away (verified accounts).
+  const studentHash = await bcrypt.hash('Student@12345', 10);
+  const students = [
+    { email: 'student@university.edu', name: 'Alex Rivera', username: 'alexr', paymentHandle: '@alexr', phone: '555-0101' },
+    { email: 'taylor@university.edu', name: 'Taylor Kim', username: 'taylork', paymentHandle: '@taylork', phone: '555-0102' },
+  ];
+  for (const s of students) {
+    await User.updateOne(
+      { email: s.email },
+      {
+        $set: {
+          role: ROLES.STUDENT,
+          emailVerified: true,
+          isActive: true,
+          university: uni._id,
+          name: s.name,
+          username: s.username,
+          paymentHandle: s.paymentHandle,
+          phone: s.phone,
+          passwordHash: studentHash,
+        },
+        $setOnInsert: { email: s.email },
+      },
+      { upsert: true }
+    );
+  }
+  console.log(`[seed] demo students ensured: ${students.map((s) => s.email).join(', ')} (password: Student@12345)`);
+
   await mongoose.disconnect();
   process.exit(0);
 })().catch((err) => {
