@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RidePact Admin Panel — Wireframes v1.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root{--bg:#F5F5F0;--white:#FFFFFF;--primary:#3AAFA9;--primary-light:#E8F6F5;--primary-dark:#2B8A85;--accent:#FF6B6B;--accent-light:#FFF0F0;--maize:#F5C842;--text:#1A1A2E;--text-2:#4A4A5A;--text-3:#8A8A9A;--border:#E8E8E8;--sidebar:#1A1A2E;--card-shadow:0 1px 3px rgba(0,0,0,0.06)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#E5E5E5;padding:24px;min-height:100vh}
+.header-bar{text-align:center;margin-bottom:20px}
+.header-bar h1{font-size:20px;font-weight:700;color:var(--text)}
+.header-bar p{font-size:13px;color:var(--text-3);margin-top:4px}
+.screen-nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:1000px;margin:0 auto 24px}
+.screen-btn{padding:6px 12px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text-2);border-radius:20px;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.screen-btn:hover{border-color:var(--primary);color:var(--primary)}
+.screen-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+
+.browser{max-width:1100px;margin:0 auto;background:var(--white);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.1);overflow:hidden;min-height:700px}
+.browser-bar{background:#F0F0F0;padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.browser-dot{width:10px;height:10px;border-radius:50%}
+.browser-url{flex:1;background:var(--white);padding:6px 12px;border-radius:6px;font-size:12px;color:var(--text-3);margin-left:8px}
+
+.admin-layout{display:flex;min-height:660px}
+.sidebar{width:220px;background:var(--sidebar);padding:20px 0;flex-shrink:0}
+.sidebar-logo{padding:0 20px 20px;font-size:16px;font-weight:800;color:white;border-bottom:1px solid rgba(255,255,255,0.1)}
+.sidebar-section{padding:16px 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3)}
+.sidebar-item{padding:10px 20px;font-size:13px;color:rgba(255,255,255,0.6);cursor:pointer;display:flex;align-items:center;gap:10px;transition:all 0.15s}
+.sidebar-item:hover{background:rgba(255,255,255,0.05);color:white}
+.sidebar-item.active{background:rgba(58,175,169,0.15);color:var(--primary);border-right:3px solid var(--primary)}
+
+.main{flex:1;background:var(--bg);overflow-y:auto}
+.main-header{padding:24px 28px 16px;background:var(--white);border-bottom:1px solid var(--border)}
+.main-header h2{font-size:20px;font-weight:700;color:var(--text)}
+.main-header p{font-size:13px;color:var(--text-3);margin-top:4px}
+.main-content{padding:24px 28px}
+
+.screen{display:none}
+.screen.active{display:block}
+
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--white);border-radius:10px;padding:16px;box-shadow:var(--card-shadow)}
+.stat-card .num{font-size:24px;font-weight:800;color:var(--text)}
+.stat-card .label{font-size:11px;color:var(--text-3);margin-top:2px}
+.stat-card .change{font-size:11px;margin-top:6px;font-weight:600}
+.stat-card .change.up{color:#2B8A85}
+.stat-card .change.down{color:var(--accent)}
+
+.data-table{width:100%;background:var(--white);border-radius:10px;box-shadow:var(--card-shadow);overflow:hidden;margin-bottom:20px}
+.data-table table{width:100%;border-collapse:collapse}
+.data-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);padding:12px 16px;border-bottom:1px solid var(--border);background:#FAFAFA;font-weight:600}
+.data-table td{padding:12px 16px;border-bottom:1px solid #F5F5F5;font-size:13px;color:var(--text-2)}
+.data-table td:first-child{font-weight:500;color:var(--text)}
+.data-table tr:last-child td{border-bottom:none}
+
+.tag-sm{display:inline-block;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.tag-active{background:#E8F6F5;color:#2B8A85}
+.tag-inactive{background:#F5F5F5;color:#999}
+.tag-high{background:#FFF0F0;color:#D32F2F}
+.tag-med{background:#FFF8E1;color:#B8860B}
+.tag-low{background:#E8F6F5;color:#2B8A85}
+
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--text)}
+.form-input:focus{border-color:var(--primary);outline:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.btn-admin{padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn-admin.primary{background:var(--primary);color:white}
+.btn-admin.outline{background:transparent;border:1.5px solid var(--border);color:var(--text-2)}
+.btn-admin.danger{background:var(--accent);color:white}
+.btn-row{display:flex;gap:8px;margin-top:16px}
+
+.card-admin{background:var(--white);border-radius:10px;padding:20px;box-shadow:var(--card-shadow);margin-bottom:16px}
+.card-admin h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+
+.chart-placeholder{background:var(--white);border-radius:10px;padding:20px;box-shadow:var(--card-shadow);margin-bottom:20px;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--text-3)}
+.chart-placeholder .icon{font-size:32px;margin-bottom:8px}
+
+.notif-compose{background:var(--white);border-radius:10px;padding:20px;box-shadow:var(--card-shadow)}
+
+.anno{max-width:1100px;margin:16px auto 0;background:#FFF9E6;border-left:3px solid #F5C842;padding:12px 16px;border-radius:0 8px 8px 0;font-size:12px;color:#666;line-height:1.6}
+.anno h4{font-size:13px;font-weight:700;color:#333;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+  <h1>RidePact Admin Panel — Wireframes v1.0</h1>
+  <p>Web-based dashboard · 11 screens · For designer & developer reference</p>
+</div>
+
+<div class="screen-nav" id="screenNav"></div>
+
+<div class="browser">
+  <div class="browser-bar">
+    <div class="browser-dot" style="background:#FF5F57"></div>
+    <div class="browser-dot" style="background:#FFBD2E"></div>
+    <div class="browser-dot" style="background:#28CA42"></div>
+    <div class="browser-url">admin.ridepact.com</div>
+  </div>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">RidePact Admin</div>
+      <div class="sidebar-section">Overview</div>
+      <div class="sidebar-item active" onclick="show('s-dash')">📊 Dashboard</div>
+      <div class="sidebar-section">Manage</div>
+      <div class="sidebar-item" onclick="show('s-users')">👤 Users</div>
+      <div class="sidebar-item" onclick="show('s-trips')">🚗 Trips</div>
+      <div class="sidebar-item" onclick="show('s-groups')">👥 Groups</div>
+      <div class="sidebar-item" onclick="show('s-events')">📋 Event Logs</div>
+      <div class="sidebar-section">Configure</div>
+      <div class="sidebar-item" onclick="show('s-schools')">🏫 Schools</div>
+      <div class="sidebar-item" onclick="show('s-dest')">📍 Destinations</div>
+      <div class="sidebar-item" onclick="show('s-pickups')">📌 Pickup Locations</div>
+      <div class="sidebar-item" onclick="show('s-calendar')">📅 Break Calendar</div>
+      <div class="sidebar-section">Communicate</div>
+      <div class="sidebar-item" onclick="show('s-notif')">🔔 Notifications</div>
+      <div class="sidebar-section">Settings</div>
+      <div class="sidebar-item" onclick="show('s-settings')">⚙️ Platform Settings</div>
+    </div>
+
+    <div class="main">
+
+      <!-- 1. DASHBOARD -->
+      <div class="screen active" id="s-dash">
+        <div class="main-header"><h2>Dashboard</h2><p>Platform overview · UMich</p></div>
+        <div class="main-content">
+          <div class="stat-row">
+            <div class="stat-card"><div class="num">247</div><div class="label">Total Users</div><div class="change up">↑ 34 this week</div></div>
+            <div class="stat-card"><div class="num">89</div><div class="label">Active Trips</div><div class="change up">↑ 12 today</div></div>
+            <div class="stat-card"><div class="num">42</div><div class="label">Completed Rides</div><div class="change up">↑ 8 this week</div></div>
+            <div class="stat-card"><div class="num">68%</div><div class="label">Match-to-Complete</div><div class="change up">↑ 5% vs last week</div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card"><div class="num">2.8</div><div class="label">Avg Riders/Group</div></div>
+            <div class="stat-card"><div class="num">$32</div><div class="label">Avg Savings/Rider</div></div>
+            <div class="stat-card"><div class="num">91%</div><div class="label">Payment Confirmed</div></div>
+            <div class="stat-card"><div class="num">4.6</div><div class="label">Avg Reliability</div></div>
+          </div>
+          <div class="chart-placeholder"><div class="icon">📈</div><div>Rides per day chart<br><span style="font-size:11px">Designer: line chart showing daily ride volume over last 30 days</span></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="chart-placeholder" style="min-height:160px"><div class="icon">🍩</div><div>Trip direction split<br><span style="font-size:11px">UMich→DTW vs DTW→UMich</span></div></div>
+            <div class="chart-placeholder" style="min-height:160px"><div class="icon">📊</div><div>Demand by break date<br><span style="font-size:11px">Bar chart: trips per upcoming break</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. USERS -->
+      <div class="screen" id="s-users">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Users</h2><p>247 registered · 198 verified</p></div>
+            <div style="display:flex;gap:8px"><input class="form-input" placeholder="Search users..." style="width:240px;padding:8px 12px;font-size:13px"><button class="btn-admin outline">Export CSV</button></div>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>User</th><th>Email</th><th>School</th><th>Rides</th><th>Rating</th><th>Payment</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Sarah K.</td><td>sk@umich.edu</td><td>UMich</td><td>8</td><td>⭐ 4.8</td><td>@sarah_venmo</td><td><span class="tag-sm tag-active">Active</span></td></tr>
+              <tr><td>Alex J.</td><td>aj@umich.edu</td><td>UMich</td><td>5</td><td>⭐ 4.5</td><td>@alex_zelle</td><td><span class="tag-sm tag-active">Active</span></td></tr>
+              <tr><td>Mike T.</td><td>mt@umich.edu</td><td>UMich</td><td>2</td><td>⭐ 3.2</td><td>@mike_venmo</td><td><span class="tag-sm tag-active">Active</span></td></tr>
+              <tr><td>Priya R.</td><td>pr@umich.edu</td><td>UMich</td><td>0</td><td>—</td><td>@priya_v</td><td><span class="tag-sm tag-inactive">Unverified</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- 3. TRIPS -->
+      <div class="screen" id="s-trips">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Trips</h2><p>89 active · 42 completed · 12 cancelled</p></div>
+            <div style="display:flex;gap:8px">
+              <select class="form-input" style="width:140px;padding:8px 12px;font-size:13px"><option>All statuses</option><option>Open</option><option>Nearly Full</option><option>Full</option><option>Booked</option><option>Completed</option></select>
+              <select class="form-input" style="width:140px;padding:8px 12px;font-size:13px"><option>All directions</option><option>UMich → DTW</option><option>DTW → UMich</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>Trip ID</th><th>Route</th><th>Date</th><th>Flight</th><th>Riders</th><th>Status</th><th>Booker</th></tr></thead>
+            <tbody>
+              <tr><td>#T-0042</td><td>UMich → DTW</td><td>Nov 24</td><td>5:15 PM</td><td>2/4</td><td><span class="tag-sm tag-active">Open</span></td><td>Sarah K.</td></tr>
+              <tr><td>#T-0041</td><td>UMich → DTW</td><td>Nov 24</td><td>4:00 PM</td><td>3/4</td><td><span class="tag-sm tag-med">Nearly Full</span></td><td>Mike T.</td></tr>
+              <tr><td>#T-0039</td><td>DTW → UMich</td><td>Nov 28</td><td>Land 3:30 PM</td><td>4/4</td><td><span class="tag-sm tag-high">Full</span></td><td>Alex J.</td></tr>
+              <tr><td>#T-0035</td><td>UMich → DTW</td><td>Oct 19</td><td>2:00 PM</td><td>3/4</td><td><span class="tag-sm" style="background:#E3F2FD;color:#1565C0">Completed</span></td><td>Sarah K.</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- 4. GROUPS -->
+      <div class="screen" id="s-groups">
+        <div class="main-header"><h2>Groups</h2><p>Active and historical ride groups</p></div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>Group</th><th>Trip</th><th>Type</th><th>Riders</th><th>Booker</th><th>Vehicle</th><th>Fare</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>#G-028</td><td>#T-0042</td><td><span class="tag-sm tag-active">Public</span></td><td>Sarah K., Alex J.</td><td>Sarah K.</td><td>UberX</td><td>Est. $57</td><td>Forming</td></tr>
+              <tr><td>#G-027</td><td>#T-0041</td><td><span class="tag-sm tag-active">Public</span></td><td>Mike T., +2</td><td>Mike T.</td><td>UberXL</td><td>Est. $62</td><td>Ready</td></tr>
+              <tr><td>#G-025</td><td>#T-0038</td><td><span class="tag-sm" style="background:#FFF8E1;color:#B8860B">Private</span></td><td>Priya R., +1</td><td>Priya R.</td><td>UberX</td><td>$48</td><td>Completed</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- 5. EVENT LOGS -->
+      <div class="screen" id="s-events">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Event Logs</h2><p>All platform activity · For analytics & future ML training</p></div>
+            <div style="display:flex;gap:8px">
+              <select class="form-input" style="width:160px;padding:8px 12px;font-size:13px"><option>All events</option><option>trip_created</option><option>group_joined</option><option>rider_left</option><option>ride_completed</option><option>payment_sent</option><option>rating_submitted</option><option>user_flaked</option></select>
+              <button class="btn-admin outline">Export CSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>Timestamp</th><th>Event</th><th>User</th><th>Details</th></tr></thead>
+            <tbody>
+              <tr><td>Nov 22, 10:42 AM</td><td><span class="tag-sm tag-active">group_joined</span></td><td>Alex J.</td><td>Joined group #G-028 (Trip #T-0042)</td></tr>
+              <tr><td>Nov 22, 10:30 AM</td><td><span class="tag-sm tag-active">trip_created</span></td><td>Sarah K.</td><td>UMich → DTW · Nov 24 · Flight 5:15 PM</td></tr>
+              <tr><td>Nov 21, 4:15 PM</td><td><span class="tag-sm tag-med">payment_sent</span></td><td>Mike T.</td><td>$19.95 to Sarah K. (Group #G-025)</td></tr>
+              <tr><td>Nov 21, 3:50 PM</td><td><span class="tag-sm" style="background:#E3F2FD;color:#1565C0">ride_completed</span></td><td>System</td><td>Group #G-025 completed · 3 riders</td></tr>
+              <tr><td>Nov 21, 2:10 PM</td><td><span class="tag-sm tag-high">user_flaked</span></td><td>Dave L.</td><td>No-show for Group #G-024</td></tr>
+              <tr><td>Nov 20, 8:00 AM</td><td><span class="tag-sm tag-active">rating_submitted</span></td><td>Sarah K.</td><td>Rated Alex J.: Reliability 5, Punctuality 4</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- 6. SCHOOLS -->
+      <div class="screen" id="s-schools">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Schools</h2><p>University configuration · Adding a school = database record, no code change</p></div>
+            <button class="btn-admin primary" onclick="show('s-school-add')">+ Add School</button>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>School</th><th>Domain</th><th>Users</th><th>Rides</th><th>Destinations</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>University of Michigan</td><td>umich.edu</td><td>247</td><td>42</td><td>DTW</td><td><span class="tag-sm tag-active">Live</span></td></tr>
+              <tr><td>Michigan State University</td><td>msu.edu</td><td>0</td><td>0</td><td>LAN</td><td><span class="tag-sm tag-inactive">Draft</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- 6b. ADD SCHOOL -->
+      <div class="screen" id="s-school-add">
+        <div class="main-header"><h2>Add New School</h2><p>Configure a new university — no code changes required</p></div>
+        <div class="main-content">
+          <div class="card-admin">
+            <h3>School Details</h3>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">School Name</label><input class="form-input" placeholder="University of Michigan" disabled></div>
+              <div class="form-group"><label class="form-label">Short Name</label><input class="form-input" placeholder="UMich" disabled></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">.edu Domain</label><input class="form-input" placeholder="umich.edu" disabled></div>
+              <div class="form-group"><label class="form-label">Solo Fare Estimate ($)</label><input class="form-input" placeholder="65" disabled></div>
+            </div>
+            <div class="form-group"><label class="form-label">Airport Buffer (minutes)</label><input class="form-input" placeholder="150" disabled></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-admin primary">Save School</button>
+            <button class="btn-admin outline" onclick="show('s-schools')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. DESTINATIONS -->
+      <div class="screen" id="s-dest">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Destinations</h2><p>Configured airport destinations per school</p></div>
+            <button class="btn-admin primary">+ Add Destination</button>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>School</th><th>Destination</th><th>Code</th><th>Terminals</th><th>Directions</th></tr></thead>
+            <tbody>
+              <tr><td>UMich</td><td>Detroit Metro Airport</td><td>DTW</td><td>McNamara, North</td><td>Both (to + from)</td></tr>
+            </tbody>
+          </table></div>
+          <div class="anno" style="max-width:100%;margin:0">
+            <h4>Developer Note</h4>
+            Adding a destination = adding a record to the school's destinations array. Terminal list is configurable per destination. Directions (to_airport, from_airport) are toggles. Zero code changes for new destinations.
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. PICKUP LOCATIONS -->
+      <div class="screen" id="s-pickups">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Pickup Locations</h2><p>Preset campus pickup points for shared pickup mode</p></div>
+            <button class="btn-admin primary">+ Add Location</button>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>School</th><th>Name</th><th>Area</th><th>Address</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>UMich</td><td>Michigan Union</td><td>Campus</td><td>530 S State St</td><td><span class="tag-sm tag-active">Active</span></td></tr>
+              <tr><td>UMich</td><td>Pierpont Commons</td><td>North</td><td>2101 Bonisteel Blvd</td><td><span class="tag-sm tag-active">Active</span></td></tr>
+              <tr><td>UMich</td><td>Central Off-Campus</td><td>Off-campus</td><td>Near S Division & E William</td><td><span class="tag-sm tag-active">Active</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="anno" style="max-width:100%;margin:0">
+            <h4>Designer Note</h4>
+            These are the preset shared pickup points that bookers can select. Area tag (Campus/North/Off-campus) is informational — shown on ride cards but NOT used for matching. Adding/editing locations is admin-only.
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. BREAK CALENDAR -->
+      <div class="screen" id="s-calendar">
+        <div class="main-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><h2>Break Calendar</h2><p>Configure travel dates and demand levels per school</p></div>
+            <button class="btn-admin primary">+ Add Break Date</button>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="data-table"><table>
+            <thead><tr><th>School</th><th>Event</th><th>Start</th><th>End</th><th>Demand</th><th>Notif Sent</th></tr></thead>
+            <tbody>
+              <tr><td>UMich</td><td>Fall Study Break</td><td>Oct 19</td><td>Oct 20</td><td><span class="tag-sm tag-low">Medium</span></td><td>✓ Oct 5, Oct 16</td></tr>
+              <tr><td>UMich</td><td>Thanksgiving Recess</td><td>Nov 25</td><td>Nov 27</td><td><span class="tag-sm tag-high">Very High</span></td><td>✓ Nov 11, ⏳ Nov 22</td></tr>
+              <tr><td>UMich</td><td>Winter Break / Exams</td><td>Dec 11</td><td>Dec 21</td><td><span class="tag-sm tag-high">Very High</span></td><td>Scheduled: Nov 27, Dec 8</td></tr>
+            </tbody>
+          </table></div>
+          <div class="anno" style="max-width:100%;margin:0">
+            <h4>Developer Note</h4>
+            Break dates drive two things: (1) the calendar display on the mobile app home screen with live demand counts, and (2) scheduled push notifications sent to all school users at 14 days and 3 days before each break. The "Notif Sent" column tracks which notifications have fired. Admin adds break dates here → they appear automatically on the mobile app.
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. NOTIFICATIONS -->
+      <div class="screen" id="s-notif">
+        <div class="main-header"><h2>Push Notifications</h2><p>Send broadcast notifications to all users</p></div>
+        <div class="main-content">
+          <div class="notif-compose">
+            <h3 style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">Compose Broadcast</h3>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Audience</label>
+                <select class="form-input"><option>All users</option><option>UMich only</option><option>MSU only</option></select>
+              </div>
+              <div class="form-group"><label class="form-label">Send</label>
+                <select class="form-input"><option>Now</option><option>Schedule for later</option></select>
+              </div>
+            </div>
+            <div class="form-group"><label class="form-label">Title</label><input class="form-input" placeholder="🔥 Thanksgiving rides are filling up!" disabled></div>
+            <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" rows="3" style="resize:vertical" placeholder="47 students are looking for rides on Nov 24. Post your trip now and save 60% vs. riding solo." disabled></textarea></div>
+            <div class="btn-row">
+              <button class="btn-admin primary">Send Notification</button>
+              <button class="btn-admin outline">Preview</button>
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <h3 style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">Sent History</h3>
+            <div class="data-table"><table>
+              <thead><tr><th>Date</th><th>Title</th><th>Audience</th><th>Delivered</th></tr></thead>
+              <tbody>
+                <tr><td>Nov 11, 9:00 AM</td><td>Thanksgiving travel — post your ride now</td><td>All UMich (247)</td><td>241 (97%)</td></tr>
+                <tr><td>Oct 5, 9:00 AM</td><td>Fall Study Break rides now open</td><td>All UMich (210)</td><td>198 (94%)</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. SETTINGS -->
+      <div class="screen" id="s-settings">
+        <div class="main-header"><h2>Platform Settings</h2><p>Global configuration</p></div>
+        <div class="main-content">
+          <div class="card-admin">
+            <h3>General</h3>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Platform Name</label><input class="form-input" value="RidePact" disabled></div>
+              <div class="form-group"><label class="form-label">Support Email</label><input class="form-input" value="support@ridepact.com" disabled></div>
+            </div>
+          </div>
+          <div class="card-admin">
+            <h3>Matching Configuration</h3>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Flight Time Window (minutes)</label><input class="form-input" value="90" disabled></div>
+              <div class="form-group"><label class="form-label">Max Riders Per Group</label><input class="form-input" value="4" disabled></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Booking Deadline Buffer (minutes)</label><input class="form-input" value="120" disabled></div>
+              <div class="form-group"><label class="form-label">Airport Buffer (minutes)</label><input class="form-input" value="150" disabled></div>
+            </div>
+          </div>
+          <div class="card-admin">
+            <h3>Booker Discount (%)</h3>
+            <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
+              <div class="form-group"><label class="form-label">2 Riders — Booker</label><input class="form-input" value="45" disabled></div>
+              <div class="form-group"><label class="form-label">3 Riders — Booker</label><input class="form-input" value="30" disabled></div>
+              <div class="form-group"><label class="form-label">4 Riders — Booker</label><input class="form-input" value="20" disabled></div>
+            </div>
+          </div>
+          <div class="card-admin">
+            <h3>Terms & Privacy</h3>
+            <div class="form-group"><label class="form-label">Terms of Service URL</label><input class="form-input" placeholder="https://ridepact.com/terms" disabled></div>
+            <div class="form-group"><label class="form-label">Privacy Policy URL</label><input class="form-input" placeholder="https://ridepact.com/privacy" disabled></div>
+          </div>
+          <div class="btn-row"><button class="btn-admin primary">Save Settings</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="anno" id="annotations"></div>
+
+<script>
+const screens = [
+  { id: 's-dash', label: 'Dashboard' },
+  { id: 's-users', label: 'Users' },
+  { id: 's-trips', label: 'Trips' },
+  { id: 's-groups', label: 'Groups' },
+  { id: 's-events', label: 'Event Logs' },
+  { id: 's-schools', label: 'Schools' },
+  { id: 's-dest', label: 'Destinations' },
+  { id: 's-pickups', label: 'Pickups' },
+  { id: 's-calendar', label: 'Break Calendar' },
+  { id: 's-notif', label: 'Notifications' },
+  { id: 's-settings', label: 'Settings' },
+];
+
+const annotations = {
+  's-dash': { title: 'Dashboard', notes: 'Top row: 4 KPI cards matching success metrics from tech brief. Second row: secondary metrics. Charts placeholder — designer creates actual chart designs. Data updates in real-time. School selector at top if multi-school.' },
+  's-users': { title: 'User Management', notes: 'Shows all registered users with email, school, ride count, reliability rating, payment handle, and verification status. Search by name or email. Export CSV for analytics. Clicking a user row could expand to show full profile, ride history, and ratings received.' },
+  's-trips': { title: 'Trip Management', notes: 'All trips with filters for status and direction. Each row shows trip ID, route, date, flight time, rider count, status badge, and booker. Clicking a row shows full trip details including all riders, group chat history, and fare split.' },
+  's-groups': { title: 'Group Monitoring', notes: 'Active and historical groups. Shows group type (Public/Private), rider names, booker, vehicle suggestion, fare (estimated or actual), and status. Links to associated trip.' },
+  's-events': { title: 'Event Logs', notes: 'CRITICAL: This is the analytics + future ML training data. Every user action logged with timestamp. Filterable by event type. Exportable as CSV. Event types: trip_created, group_joined, rider_left, booker_reassigned, ride_booked, ride_completed, ride_cancelled, payment_sent, payment_received, rating_submitted, user_flaked. This data feeds future AI matching model.' },
+  's-schools': { title: 'School Configuration', notes: 'Adding a new school = creating a new row here. No code changes required. Each school has its own .edu domain, destinations, pickup presets, break calendar, and solo fare estimate. "Draft" status means configured but not yet live to students.' },
+  's-dest': { title: 'Destinations', notes: 'Airport destinations per school. Each destination has terminals (for return rides — rider selects terminal). Directions toggle controls whether the route supports to_airport, from_airport, or both.' },
+  's-pickups': { title: 'Pickup Locations', notes: 'Preset campus meeting points for shared pickup mode. Area tag is informational only (NOT used for matching). These appear as options when the booker selects "Shared Pickup" in the mobile app.' },
+  's-calendar': { title: 'Break Calendar', notes: 'Break dates drive two features: (1) the mobile app calendar with live demand counts, and (2) automated push notifications at 14 days and 3 days before each break. Admin adds dates here → they appear on mobile automatically. "Notif Sent" column tracks notification delivery status.' },
+  's-notif': { title: 'Broadcast Notifications', notes: 'Admin can send custom push notifications to all users or filtered by school. Includes compose form (title, message, audience, timing) and sent history with delivery rates. Used for announcements, new school launches, or promotional pushes beyond the automated break calendar notifications.' },
+  's-settings': { title: 'Platform Settings', notes: 'Global configuration: matching window (90 min default), max riders (4 default), booking deadline buffer, airport buffer, booker discount percentages per group size. Also terms/privacy URLs. These values are referenced by the matching engine and fare split logic — changing them here changes app behavior without code deployment.' },
+};
+
+const nav = document.getElementById('screenNav');
+screens.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'screen-btn' + (s.id === 's-dash' ? ' active' : '');
+  btn.textContent = s.label;
+  btn.onclick = () => show(s.id);
+  nav.appendChild(btn);
+});
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  
+  const btns = document.querySelectorAll('.screen-btn');
+  const idx = screens.findIndex(s => s.id === id);
+  if (idx >= 0 && btns[idx]) btns[idx].classList.add('active');
+  
+  const sidebarItems = document.querySelectorAll('.sidebar-item');
+  sidebarItems.forEach(item => {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(id)) {
+      item.classList.add('active');
+    }
+  });
+  
+  const anno = annotations[id];
+  const annoEl = document.getElementById('annotations');
+  if (anno) {
+    annoEl.innerHTML = '<h4>' + anno.title + '</h4>' + anno.notes;
+  }
+}
+show('s-dash');
+</script>
+</body>
+</html>

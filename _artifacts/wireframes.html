@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RidePact — Wireframes v1.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #F5F5F0;
+  --white: #FFFFFF;
+  --primary: #3AAFA9;
+  --primary-light: #E8F6F5;
+  --primary-dark: #2B8A85;
+  --accent: #FF6B6B;
+  --accent-light: #FFF0F0;
+  --maize: #F5C842;
+  --maize-light: #FFF8E1;
+  --text: #1A1A2E;
+  --text-2: #4A4A5A;
+  --text-3: #8A8A9A;
+  --border: #E8E8E8;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: #E5E5E5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 24px; }
+
+.header-bar { text-align: center; margin-bottom: 24px; }
+.header-bar h1 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.header-bar p { font-size: 13px; color: var(--text-3); margin-top: 4px; }
+
+.screen-nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 800px; margin-bottom: 24px; }
+.screen-btn { padding: 6px 12px; font-size: 11px; font-weight: 500; border: 1px solid var(--border); background: var(--white); color: var(--text-2); border-radius: 20px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.screen-btn:hover { border-color: var(--primary); color: var(--primary); }
+.screen-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.phone { width: 375px; height: 812px; background: var(--bg); border-radius: 40px; border: 8px solid #1a1a1a; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 160px; height: 30px; background: #1a1a1a; border-radius: 0 0 20px 20px; z-index: 100; }
+.phone-screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; overflow-x: hidden; }
+.phone-screen::-webkit-scrollbar { display: none; }
+
+.screen { display: none; flex-direction: column; min-height: 100%; padding-bottom: 80px; }
+.screen.active { display: flex; }
+
+/* Status bar */
+.status-bar { padding: 36px 24px 8px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text); }
+
+/* Navigation */
+.top-nav { padding: 8px 20px 12px; display: flex; align-items: center; justify-content: space-between; }
+.top-nav h2 { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.top-nav .back { font-size: 20px; cursor: pointer; color: var(--text); width: 32px; }
+.top-nav .icon { width: 32px; height: 32px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); font-size: 14px; cursor: pointer; }
+
+.tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 76px; background: var(--white); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; padding: 0 8px 16px; z-index: 50; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--text-3); cursor: pointer; padding: 6px 12px; }
+.tab.active { color: var(--primary); }
+.tab .tab-icon { font-size: 20px; }
+.tab-create { width: 48px; height: 48px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 300; box-shadow: 0 4px 12px rgba(58,175,169,0.3); cursor: pointer; margin-top: -20px; }
+
+/* Cards */
+.card { background: var(--white); border-radius: 14px; padding: 16px; margin: 0 20px 12px; box-shadow: var(--card-shadow); }
+.card-sm { background: var(--white); border-radius: 10px; padding: 12px 14px; box-shadow: var(--card-shadow); }
+
+/* Inputs */
+.input-group { margin: 0 20px 14px; }
+.input-label { font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
+.input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 15px; font-family: inherit; color: var(--text); background: var(--white); }
+.input::placeholder { color: var(--text-3); }
+.input:focus { border-color: var(--primary); outline: none; }
+
+/* Buttons */
+.btn { width: calc(100% - 40px); margin: 8px 20px; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer; text-align: center; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+.btn-sm { padding: 10px 20px; font-size: 14px; border-radius: 10px; width: auto; margin: 0; }
+
+/* Tags */
+.tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.tag-open { background: #E8F6F5; color: #2B8A85; }
+.tag-nearly { background: #FFF8E1; color: #B8860B; }
+.tag-full { background: #FFF0F0; color: #D32F2F; }
+.tag-booked { background: #E3F2FD; color: #1565C0; }
+
+/* Ride card */
+.ride-card { background: var(--white); border-radius: 14px; padding: 16px; margin: 0 20px 12px; box-shadow: var(--card-shadow); }
+.ride-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ride-card-route { font-size: 15px; font-weight: 700; color: var(--text); }
+.ride-card-detail { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #F5F5F5; font-size: 13px; }
+.ride-card-detail:last-child { border-bottom: none; }
+.ride-card-detail .label { color: var(--text-3); }
+.ride-card-detail .value { color: var(--text); font-weight: 500; }
+.ride-card-savings { background: var(--primary-light); border-radius: 8px; padding: 8px 12px; margin-top: 10px; text-align: center; font-size: 13px; font-weight: 600; color: var(--primary-dark); }
+
+/* Avatar */
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--primary-dark); flex-shrink: 0; }
+.avatar-sm { width: 28px; height: 28px; font-size: 11px; }
+
+/* Riders row */
+.riders-row { display: flex; gap: 8px; align-items: center; margin: 10px 0; }
+.rider-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; background: #F8F8F8; border-radius: 20px; font-size: 12px; color: var(--text-2); }
+.booker-badge { font-size: 9px; background: var(--maize); color: #7A6000; padding: 2px 6px; border-radius: 8px; font-weight: 700; margin-left: 2px; }
+
+/* Chat */
+.chat-container { flex: 1; padding: 0 20px; }
+.chat-pinned { background: var(--primary-light); border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid rgba(58,175,169,0.15); }
+.chat-pinned-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary-dark); margin-bottom: 8px; }
+.chat-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
+.chat-bubble.them { background: var(--white); color: var(--text); border-bottom-left-radius: 4px; box-shadow: var(--card-shadow); }
+.chat-bubble.me { background: var(--primary); color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+.chat-bubble.system { background: #F5F5F0; color: var(--text-3); font-size: 12px; text-align: center; max-width: 100%; border-radius: 8px; }
+.chat-name { font-size: 11px; font-weight: 600; color: var(--text-3); margin-bottom: 2px; }
+.chat-input-bar { position: absolute; bottom: 76px; left: 0; right: 0; padding: 8px 16px; background: var(--white); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+.chat-input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 14px; font-family: inherit; }
+
+/* Split card */
+.split-card { background: var(--white); border-radius: 16px; margin: 0 20px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.split-header { background: var(--primary); padding: 20px; text-align: center; color: white; }
+.split-header .check { font-size: 32px; margin-bottom: 4px; }
+.split-header h3 { font-size: 18px; font-weight: 700; }
+.split-row { display: flex; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #F5F5F5; font-size: 14px; }
+.split-row .label { color: var(--text-3); }
+.split-row .amount { color: var(--text); font-weight: 600; }
+.split-row .you { color: var(--primary); font-weight: 700; }
+.split-action { padding: 16px 20px; }
+.split-action .btn-primary { width: 100%; margin: 0; }
+.split-venmo { text-align: center; padding: 8px; font-size: 11px; color: var(--text-3); }
+
+/* Rating */
+.stars { display: flex; gap: 8px; justify-content: center; margin: 12px 0; }
+.star { font-size: 32px; color: var(--border); cursor: pointer; }
+.star.filled { color: var(--maize); }
+
+/* Calendar */
+.cal-event { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #F5F5F5; }
+.cal-date { width: 48px; height: 48px; background: var(--primary-light); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.cal-date .month { font-size: 10px; font-weight: 700; color: var(--primary-dark); text-transform: uppercase; }
+.cal-date .day { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
+.cal-info h4 { font-size: 14px; font-weight: 600; color: var(--text); }
+.cal-info p { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.cal-demand { font-size: 11px; font-weight: 600; color: var(--primary); margin-top: 3px; }
+
+/* Welcome screen */
+.welcome-bg { background: linear-gradient(180deg, #3AAFA9 0%, #2B8A85 100%); min-height: 100%; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px 24px 40px; padding-bottom: 40px; }
+.welcome-logo { font-size: 36px; font-weight: 800; color: white; letter-spacing: -1px; margin-bottom: 8px; margin-top: auto; }
+.welcome-sub { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.5; }
+.welcome-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer; margin-bottom: 10px; }
+.welcome-btn.primary { background: white; color: var(--primary-dark); }
+.welcome-btn.ghost { background: rgba(255,255,255,0.15); color: white; border: 1.5px solid rgba(255,255,255,0.3); }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 40px 20px; }
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: var(--text-3); line-height: 1.5; max-width: 260px; margin: 0 auto 20px; }
+
+/* Toggle */
+.toggle-row { display: flex; gap: 0; margin: 0 20px 16px; background: #F0F0F0; border-radius: 10px; padding: 3px; }
+.toggle-opt { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; color: var(--text-3); border-radius: 8px; cursor: pointer; }
+.toggle-opt.active { background: var(--white); color: var(--text); box-shadow: var(--card-shadow); }
+
+/* Notif */
+.notif-item { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #F5F5F5; }
+.notif-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.notif-text h4 { font-size: 13px; font-weight: 600; color: var(--text); }
+.notif-text p { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.notif-text .time { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+/* Section title */
+.section-title { padding: 16px 20px 8px; font-size: 13px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Profile */
+.profile-header { text-align: center; padding: 20px; }
+.profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: var(--primary-dark); }
+.profile-name { font-size: 20px; font-weight: 700; color: var(--text); }
+.profile-school { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+.profile-stats { display: flex; justify-content: center; gap: 32px; margin-top: 16px; }
+.profile-stat { text-align: center; }
+.profile-stat .num { font-size: 20px; font-weight: 700; color: var(--text); }
+.profile-stat .label { font-size: 11px; color: var(--text-3); }
+.profile-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #F5F5F5; }
+.profile-row .label { font-size: 14px; color: var(--text); }
+.profile-row .value { font-size: 14px; color: var(--text-3); }
+
+/* Misc */
+.divider { height: 8px; background: #F0F0EC; }
+.spacer { height: 16px; }
+.px20 { padding-left: 20px; padding-right: 20px; }
+
+/* Screen label */
+.screen-label { position: absolute; top: 36px; right: 16px; background: rgba(0,0,0,0.5); color: white; font-size: 9px; padding: 3px 8px; border-radius: 4px; z-index: 200; font-weight: 600; letter-spacing: 0.5px; }
+
+/* Annotations */
+.anno { width: 375px; padding: 14px 16px; font-size: 12px; color: #666; line-height: 1.6; background: #FFF9E6; border-left: 3px solid #F5C842; border-radius: 0 8px 8px 0; }
+.anno h4 { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px; }
+
+.layout { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+@media print {
+  body { background: white; padding: 0; }
+  .screen-nav, .header-bar { display: none; }
+  .phone { box-shadow: 1px solid #ccc; border: 2px solid #333; }
+}
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+  <h1>RidePact — Wireframes v1.0</h1>
+  <p>Core journey screens · Placeholder name & colors · For designer reference</p>
+</div>
+
+<div class="screen-nav" id="screenNav"></div>
+
+<div class="layout">
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-screen">
+
+    <!-- ===== 1. WELCOME ===== -->
+    <div class="screen active" id="s-welcome">
+      <div class="welcome-bg">
+        <div style="font-size:64px;margin-bottom:20px">✈️</div>
+        <div class="welcome-logo">RidePact</div>
+        <div class="welcome-sub">Find your airport crew.<br>Split the ride. Save 60%.</div>
+        <button class="welcome-btn primary" onclick="show('s-signup')">Get Started</button>
+        <button class="welcome-btn ghost" onclick="show('s-signin')">I already have an account</button>
+      </div>
+    </div>
+
+    <!-- ===== 2. SIGN IN ===== -->
+    <div class="screen" id="s-signin">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div style="padding:24px 20px 0">
+        <h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:4px">Welcome back</h2>
+        <p style="font-size:14px;color:var(--text-3);margin-bottom:28px">Sign in with your university email</p>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Email</div>
+        <input class="input" placeholder="you@umich.edu" disabled>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Password</div>
+        <input class="input" type="password" placeholder="••••••••" disabled>
+      </div>
+      <p style="text-align:right;padding:0 20px;font-size:13px;color:var(--primary);font-weight:500;margin-bottom:20px;cursor:pointer">Forgot password?</p>
+      <button class="btn btn-primary" onclick="show('s-home')">Sign In</button>
+      <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-3)">Don't have an account? <span style="color:var(--primary);font-weight:600;cursor:pointer" onclick="show('s-signup')">Sign Up</span></p>
+    </div>
+
+    <!-- ===== 3. SIGN UP ===== -->
+    <div class="screen" id="s-signup">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div style="padding:24px 20px 0">
+        <h2 style="font-size:26px;font-weight:800;color:var(--text);margin-bottom:4px">Create account</h2>
+        <p style="font-size:14px;color:var(--text-3);margin-bottom:24px">Only verified .edu emails accepted</p>
+      </div>
+      <div class="input-group"><div class="input-label">Username</div><input class="input" placeholder="jdoe" disabled></div>
+      <div class="input-group"><div class="input-label">University Email</div><input class="input" placeholder="you@umich.edu" disabled></div>
+      <div class="input-group"><div class="input-label">Password</div><input class="input" type="password" placeholder="••••••••" disabled></div>
+      <div class="input-group"><div class="input-label">Venmo or Zelle handle</div><input class="input" placeholder="@yourhandle" disabled></div>
+      <div class="input-group"><div class="input-label">Pickup Address (private)</div><input class="input" placeholder="123 State St, Ann Arbor" disabled></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="show('s-home')">Create Account</button>
+      <p style="text-align:center;margin-top:12px;font-size:11px;color:var(--text-3);padding:0 40px;line-height:1.5">By signing up, you agree to our Terms of Service and Privacy Policy</p>
+    </div>
+
+    <!-- ===== 4. HOME ===== -->
+    <div class="screen" id="s-home">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <h2>Home</h2>
+        <div class="icon" onclick="show('s-notif')">🔔</div>
+      </div>
+
+      <!-- Upcoming ride -->
+      <div class="section-title">Your Upcoming Ride</div>
+      <div class="ride-card" onclick="show('s-group')" style="cursor:pointer">
+        <div class="ride-card-header">
+          <span class="ride-card-route">UMich → DTW</span>
+          <span class="tag tag-nearly">2/4 riders</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Flight</span><span class="value">Nov 24 · 5:15 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Depart campus</span><span class="value">~2:30 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Est. per person</span><span class="value">$22</span></div>
+        <div class="ride-card-savings">💰 Save ~62% vs. riding solo</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Break calendar -->
+      <div class="section-title">Upcoming Travel</div>
+      <div class="card">
+        <div class="cal-event">
+          <div class="cal-date"><span class="month">Nov</span><span class="day">24</span></div>
+          <div class="cal-info">
+            <h4>Thanksgiving Recess</h4>
+            <p>Nov 25–27 · Campus closed</p>
+            <div class="cal-demand">🔥 47 students looking for rides</div>
+          </div>
+        </div>
+        <div class="cal-event" style="border-bottom:none">
+          <div class="cal-date"><span class="month">Dec</span><span class="day">11</span></div>
+          <div class="cal-info">
+            <h4>Winter Break</h4>
+            <p>Dec 11–21 · Exams end Dec 11</p>
+            <div class="cal-demand">12 students looking for rides</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab active"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab" onclick="show('s-browse')"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab" onclick="show('s-chat')"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab" onclick="show('s-profile')"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 5. HOME EMPTY STATE ===== -->
+    <div class="screen" id="s-empty">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <h2>Home</h2>
+        <div class="icon">🔔</div>
+      </div>
+
+      <div class="empty-state">
+        <div class="icon">✈️</div>
+        <h3>No rides yet</h3>
+        <p>Be the first! Post your trip and we'll notify you when someone matches your flight time.</p>
+        <button class="btn-sm btn-primary" style="border:none;color:white;cursor:pointer;padding:12px 24px;border-radius:12px;font-family:inherit;font-weight:600;font-size:14px;background:var(--primary)" onclick="show('s-create')">Create a Ride</button>
+      </div>
+
+      <div class="divider" style="margin-top:12px"></div>
+
+      <div class="section-title">Upcoming Travel</div>
+      <div class="card">
+        <div class="cal-event" style="border-bottom:none">
+          <div class="cal-date"><span class="month">Nov</span><span class="day">24</span></div>
+          <div class="cal-info">
+            <h4>Thanksgiving Recess</h4>
+            <p>Nov 25–27</p>
+            <div class="cal-demand">🔥 34 students already looking</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:16px 20px">
+        <button class="btn btn-outline" style="width:100%;margin:0;cursor:pointer" onclick="show('s-notif')">🔔 Notify me when rides are posted</button>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab active"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 6. CREATE RIDE ===== -->
+    <div class="screen" id="s-create">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-home')">←</span>
+        <h2>Create Ride</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-opt active">Find Riders</div>
+        <div class="toggle-opt" onclick="show('s-private')">Invite Friends</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Direction</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;padding:12px;background:var(--primary-light);border:1.5px solid var(--primary);border-radius:10px;text-align:center;font-size:13px;font-weight:600;color:var(--primary-dark)">UMich → DTW</div>
+          <div style="flex:1;padding:12px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;text-align:center;font-size:13px;font-weight:600;color:var(--text-3)">DTW → UMich</div>
+        </div>
+      </div>
+      <div class="input-group"><div class="input-label">Flight Departure Time</div><input class="input" placeholder="5:15 PM" disabled></div>
+      <div class="input-group"><div class="input-label">Travel Date</div><input class="input" placeholder="Nov 24, 2026" disabled></div>
+      <div class="input-group"><div class="input-label">Airline & Flight # (optional)</div><input class="input" placeholder="Delta DL1234" disabled></div>
+      <div class="input-group"><div class="input-label">Checked Bags</div>
+        <div style="display:flex;gap:8px">
+          <div style="padding:12px 20px;background:var(--primary-light);border:1.5px solid var(--primary);border-radius:10px;font-weight:600;color:var(--primary-dark);font-size:14px">0</div>
+          <div style="padding:12px 20px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;font-weight:600;color:var(--text-3);font-size:14px">1</div>
+          <div style="padding:12px 20px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;font-weight:600;color:var(--text-3);font-size:14px">2</div>
+          <div style="padding:12px 20px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;font-weight:600;color:var(--text-3);font-size:14px">3</div>
+        </div>
+      </div>
+      <div class="input-group" style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:14px;color:var(--text)">I'm flexible on timing</span>
+        <div style="width:44px;height:26px;background:var(--border);border-radius:13px;position:relative"><div style="width:22px;height:22px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;box-shadow:var(--card-shadow)"></div></div>
+      </div>
+
+      <div class="card" style="background:var(--primary-light);border:1px solid rgba(58,175,169,0.15)">
+        <div style="font-size:12px;color:var(--primary-dark);font-weight:600;margin-bottom:4px">Auto-calculated</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--text-3)">Suggested departure</span>
+          <span style="color:var(--text);font-weight:600">~2:30 PM</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-top:4px">
+          <span style="color:var(--text-3)">Book by</span>
+          <span style="color:var(--text);font-weight:600">12:30 PM</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="show('s-browse')">Post Ride</button>
+    </div>
+
+    <!-- ===== 7. CREATE PRIVATE GROUP ===== -->
+    <div class="screen" id="s-private">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-create')">←</span>
+        <h2>Private Group</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-opt" onclick="show('s-create')">Find Riders</div>
+        <div class="toggle-opt active">Invite Friends</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Destination</div>
+        <div class="card-sm" style="margin:0;border:1.5px solid var(--primary);background:var(--primary-light);margin-bottom:8px;cursor:pointer">
+          <div style="font-size:14px;font-weight:600;color:var(--primary-dark)">✈️ DTW — Detroit Metro Airport</div>
+          <div style="font-size:11px;color:var(--primary-dark);opacity:0.7">Full smart features · Auto-computed times</div>
+        </div>
+        <div class="card-sm" style="margin:0;border:1.5px solid var(--border);cursor:pointer">
+          <div style="font-size:14px;font-weight:600;color:var(--text)">📍 Custom destination</div>
+          <div style="font-size:11px;color:var(--text-3)">Type any destination · Manual times</div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="input-group"><div class="input-label">Flight Departure Time</div><input class="input" placeholder="5:15 PM" disabled></div>
+      <div class="input-group"><div class="input-label">Travel Date</div><input class="input" placeholder="Nov 24, 2026" disabled></div>
+      <div class="input-group"><div class="input-label">Checked Bags</div><input class="input" placeholder="1" disabled></div>
+
+      <button class="btn btn-primary">Create & Get Invite Link</button>
+      <p style="text-align:center;font-size:12px;color:var(--text-3);margin-top:8px;padding:0 40px">Share the link with friends. They'll need a .edu email to join.</p>
+    </div>
+
+    <!-- ===== 8. BROWSE RIDES ===== -->
+    <div class="screen" id="s-browse">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <h2>Available Rides</h2>
+        <div class="icon">⚙️</div>
+      </div>
+
+      <div style="padding:0 20px 12px;font-size:13px;color:var(--text-3)">Nov 24 · UMich → DTW · 3 matches</div>
+
+      <div class="ride-card" onclick="show('s-group')" style="cursor:pointer">
+        <div class="ride-card-header">
+          <span class="ride-card-route">UMich → DTW</span>
+          <span class="tag tag-open">Open · 2/4</span>
+        </div>
+        <div class="riders-row">
+          <div class="rider-chip"><div class="avatar avatar-sm">SK</div>Sarah K.<span class="booker-badge">BOOKER</span></div>
+          <div class="rider-chip"><div class="avatar avatar-sm">AJ</div>Alex J.</div>
+        </div>
+        <div class="ride-card-detail"><span class="label">Flights</span><span class="value">5:15 PM, 5:45 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Depart</span><span class="value">~2:30 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Vehicle</span><span class="value">UberX · 2 bags</span></div>
+        <div class="ride-card-detail"><span class="label">Est. per person</span><span class="value">$19</span></div>
+        <div class="ride-card-savings">💰 Save ~62% vs. riding solo</div>
+      </div>
+
+      <div class="ride-card" style="cursor:pointer">
+        <div class="ride-card-header">
+          <span class="ride-card-route">UMich → DTW</span>
+          <span class="tag tag-nearly">Nearly Full · 3/4</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Flights</span><span class="value">4:00 PM, 4:30 PM, 4:45 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Depart</span><span class="value">~1:15 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Est. per person</span><span class="value">$17</span></div>
+        <div class="ride-card-savings">💰 Save ~68% vs. riding solo</div>
+      </div>
+
+      <div class="ride-card" style="opacity:0.5">
+        <div class="ride-card-header">
+          <span class="ride-card-route">UMich → DTW</span>
+          <span class="tag tag-full">Full · 4/4</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Flights</span><span class="value">6:00 PM – 6:30 PM</span></div>
+        <div style="text-align:center;padding:8px 0;font-size:12px;color:var(--accent);font-weight:600">This ride is full</div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab" onclick="show('s-home')"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab active"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab" onclick="show('s-chat')"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab" onclick="show('s-profile')"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 9. GROUP DETAILS ===== -->
+    <div class="screen" id="s-group">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-home')">←</span>
+        <h2>Ride Group</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--primary)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:16px;font-weight:700;color:var(--text)">UMich → DTW</span>
+          <span class="tag tag-open">Open · 2/4</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Date</span><span class="value">Nov 24, 2026</span></div>
+        <div class="ride-card-detail"><span class="label">Suggested departure</span><span class="value">~2:30 PM</span></div>
+        <div class="ride-card-detail"><span class="label">Book by</span><span class="value" style="color:var(--accent);font-weight:700">12:30 PM (4h 23m left)</span></div>
+        <div class="ride-card-detail"><span class="label">Vehicle</span><span class="value">UberX recommended</span></div>
+        <div class="ride-card-detail"><span class="label">Total bags</span><span class="value">2 checked</span></div>
+        <div class="ride-card-detail"><span class="label">Est. fare</span><span class="value">$57 total · ~$19/person</span></div>
+        <div class="ride-card-savings">💰 Save ~62% vs. $57 solo</div>
+      </div>
+
+      <div class="section-title">Riders</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F5F5F5">
+          <div class="avatar">SK</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Sarah K. <span class="booker-badge">BOOKER</span></div>
+            <div style="font-size:12px;color:var(--text-3)">Flight 5:15 PM · 1 bag · ⭐ 4.8</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+          <div class="avatar">AJ</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Alex J.</div>
+            <div style="font-size:12px;color:var(--text-3)">Flight 5:45 PM · 1 bag · ⭐ 4.5</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:0 20px;display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1;margin:0" onclick="show('s-chat')">Group Chat</button>
+        <button class="btn btn-outline" style="width:auto;margin:0;padding:16px;color:var(--accent)">Leave</button>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab" onclick="show('s-home')"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab" onclick="show('s-chat')"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab" onclick="show('s-profile')"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 10. GROUP CHAT ===== -->
+    <div class="screen" id="s-chat">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-group')">←</span>
+        <h2 style="font-size:17px">UMich → DTW · Nov 24</h2>
+        <div class="icon" onclick="show('s-group')">ℹ️</div>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-pinned">
+          <div class="chat-pinned-title">📌 Ride Details</div>
+          <div style="font-size:12px;color:var(--text-2);line-height:1.6">
+            <div style="display:flex;justify-content:space-between"><span>Depart</span><b>~2:30 PM</b></div>
+            <div style="display:flex;justify-content:space-between"><span>Book by</span><b style="color:var(--accent)">12:30 PM</b></div>
+            <div style="display:flex;justify-content:space-between"><span>Vehicle</span><b>UberX</b></div>
+            <div style="display:flex;justify-content:space-between"><span>Est. per person</span><b>~$19</b></div>
+            <div style="background:var(--primary);color:white;text-align:center;padding:6px;border-radius:6px;margin-top:8px;font-weight:600;font-size:11px;cursor:pointer">💰 Save ~62% · Book Now</div>
+          </div>
+        </div>
+
+        <div class="chat-bubble system">Alex J. joined the group</div>
+        <div><div class="chat-name">Sarah K. 🏷️ Booker</div><div class="chat-bubble them">Hey! I can book the Uber. Want to meet at Michigan Union at 2:15?</div></div>
+        <div><div class="chat-bubble me">Works for me! I'll be at the Union by 2:10.</div></div>
+        <div><div class="chat-name">Sarah K.</div><div class="chat-bubble them">Perfect. UberXL should fit us + bags. I'll book at noon unless we get a 3rd rider before then.</div></div>
+        <div class="chat-bubble system">Booking deadline: 4h 23m remaining</div>
+      </div>
+
+      <div class="chat-input-bar">
+        <input class="chat-input" placeholder="Type a message..." disabled>
+        <div style="width:36px;height:36px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;cursor:pointer">↑</div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab" onclick="show('s-home')"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab active"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab" onclick="show('s-profile')"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 11. FARE SPLIT ===== -->
+    <div class="screen" id="s-split">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-chat')">←</span>
+        <h2>Fare Split</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="split-card">
+        <div class="split-header">
+          <div class="check">✓</div>
+          <h3>Ride Complete</h3>
+        </div>
+        <div class="split-row"><span class="label">Total fare</span><span class="amount">$57.00</span></div>
+        <div class="split-row"><span class="label">Sarah K. (Booker · 30%)</span><span class="amount">$17.10</span></div>
+        <div class="split-row"><span class="label">You (35%)</span><span class="you">$19.95</span></div>
+        <div class="split-row"><span class="label">Alex J. (35%)</span><span class="amount">$19.95</span></div>
+        <div class="split-action">
+          <button class="btn btn-primary" style="width:100%;margin:0">Copy $19.95 · Pay @sarah_venmo</button>
+        </div>
+        <div class="split-venmo">Tap to copy amount and Venmo handle</div>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">Payment Status</div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F5F5F5;font-size:13px">
+          <span style="color:var(--text-2)">Sarah K. (Booker)</span>
+          <span style="color:var(--primary);font-weight:600">Paid ✓</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F5F5F5;font-size:13px">
+          <span style="color:var(--text-2)">You</span>
+          <span style="color:var(--maize);font-weight:600">Pending</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px">
+          <span style="color:var(--text-2)">Alex J.</span>
+          <span style="color:var(--primary);font-weight:600">Paid ✓</span>
+        </div>
+      </div>
+
+      <button class="btn btn-outline" onclick="show('s-rate')">I've Paid → Continue to Rating</button>
+    </div>
+
+    <!-- ===== 12. RATE ===== -->
+    <div class="screen" id="s-rate">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-split')">←</span>
+        <h2>Rate Riders</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div style="text-align:center;padding:20px 20px 0">
+        <p style="font-size:14px;color:var(--text-3)">How was your ride with</p>
+      </div>
+
+      <div class="card" style="text-align:center">
+        <div class="avatar" style="width:56px;height:56px;font-size:22px;margin:0 auto 8px">SK</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">Sarah K.</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Booker</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:4px">Reliability</div>
+        <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span></div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-top:12px;margin-bottom:4px">Punctuality</div>
+        <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span></div>
+      </div>
+
+      <div class="card" style="text-align:center">
+        <div class="avatar" style="width:56px;height:56px;font-size:22px;margin:0 auto 8px">AJ</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text)">Alex J.</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-top:8px;margin-bottom:4px">Reliability</div>
+        <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span></div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-top:12px;margin-bottom:4px">Punctuality</div>
+        <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span><span class="star">★</span></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="show('s-home')">Submit Ratings</button>
+    </div>
+
+    <!-- ===== 13. NOTIFICATIONS ===== -->
+    <div class="screen" id="s-notif">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-home')">←</span>
+        <h2>Notifications</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div class="notif-item">
+        <div class="notif-dot"></div>
+        <div class="notif-text">
+          <h4>Alex J. joined your ride group</h4>
+          <p>Your UMich → DTW ride now has 2/4 riders.</p>
+          <div class="time">2 hours ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-dot"></div>
+        <div class="notif-text">
+          <h4>Booking deadline approaching</h4>
+          <p>Your ride departs in 6 hours. Book now or another rider can take over.</p>
+          <div class="time">3 hours ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-dot" style="background:var(--maize)"></div>
+        <div class="notif-text">
+          <h4>🔥 Thanksgiving travel — post your ride now</h4>
+          <p>47 students are already looking for rides on Nov 24.</p>
+          <div class="time">1 day ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-dot" style="background:var(--border)"></div>
+        <div class="notif-text">
+          <h4>Payment confirmed</h4>
+          <p>Alex J. confirmed payment of $19.95 for your last ride.</p>
+          <div class="time">3 days ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-dot" style="background:var(--border)"></div>
+        <div class="notif-text">
+          <h4>Rate your riders</h4>
+          <p>Your DTW ride is complete. Rate Sarah K. and Alex J.</p>
+          <div class="time">3 days ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 14. PROFILE ===== -->
+    <div class="screen" id="s-profile">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span style="width:32px"></span>
+        <h2>Profile</h2>
+        <div class="icon">⚙️</div>
+      </div>
+
+      <div class="profile-header">
+        <div class="profile-avatar">NS</div>
+        <div class="profile-name">Nauman S.</div>
+        <div class="profile-school">University of Michigan · Class of 2027</div>
+        <div class="profile-stats">
+          <div class="profile-stat"><div class="num">4.8</div><div class="label">Rating</div></div>
+          <div class="profile-stat"><div class="num">12</div><div class="label">Rides</div></div>
+          <div class="profile-stat"><div class="num">$340</div><div class="label">Saved</div></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="profile-row"><span class="label">📧 Email</span><span class="value">ns@umich.edu</span></div>
+      <div class="profile-row"><span class="label">💰 Payment</span><span class="value">@nauman_venmo</span></div>
+      <div class="profile-row"><span class="label">📍 Pickup area</span><span class="value">Central Campus</span></div>
+      <div class="profile-row"><span class="label">🏠 Address</span><span class="value">Visible to booker only</span></div>
+      <div class="profile-row" style="cursor:pointer" onclick="show('s-history')"><span class="label">📋 Ride history</span><span class="value" style="color:var(--primary)">View →</span></div>
+      <div class="profile-row"><span class="label">📄 Terms & Privacy</span><span class="value" style="color:var(--primary)">View →</span></div>
+      <div class="profile-row" style="border-bottom:none"><span class="label" style="color:var(--accent)">Sign out</span><span class="value"></span></div>
+
+      <div class="tab-bar">
+        <div class="tab" onclick="show('s-home')"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab active"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 15. RIDE HISTORY ===== -->
+    <div class="screen" id="s-history">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-profile')">←</span>
+        <h2>Ride History</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div style="padding:0 20px 8px;font-size:13px;color:var(--text-3)">3 completed rides · $98 saved total</div>
+
+      <div class="ride-card">
+        <div class="ride-card-header">
+          <span class="ride-card-route">UMich → DTW</span>
+          <span class="tag tag-booked" style="background:#E8F6F5;color:#2B8A85">Completed ✓</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Date</span><span class="value">Nov 24, 2026</span></div>
+        <div class="ride-card-detail"><span class="label">Riders</span><span class="value">Sarah K. (Booker), Alex J., You</span></div>
+        <div class="ride-card-detail"><span class="label">Total fare</span><span class="value">$57.00</span></div>
+        <div class="ride-card-detail"><span class="label">You paid</span><span class="value">$19.95 (35%)</span></div>
+        <div class="ride-card-detail"><span class="label">You saved</span><span class="value" style="color:var(--primary);font-weight:700">$37.05 (65%)</span></div>
+        <div class="ride-card-detail"><span class="label">Payment</span><span class="value" style="color:var(--primary)">Confirmed ✓</span></div>
+        <div class="ride-card-detail"><span class="label">Your rating given</span><span class="value">⭐ 4.5 avg</span></div>
+      </div>
+
+      <div class="ride-card">
+        <div class="ride-card-header">
+          <span class="ride-card-route">DTW → UMich</span>
+          <span class="tag tag-booked" style="background:#E8F6F5;color:#2B8A85">Completed ✓</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Date</span><span class="value">Aug 28, 2026</span></div>
+        <div class="ride-card-detail"><span class="label">Riders</span><span class="value">You (Booker), Mike T.</span></div>
+        <div class="ride-card-detail"><span class="label">Total fare</span><span class="value">$52.00</span></div>
+        <div class="ride-card-detail"><span class="label">You paid</span><span class="value">$23.40 (45%)</span></div>
+        <div class="ride-card-detail"><span class="label">You saved</span><span class="value" style="color:var(--primary);font-weight:700">$28.60 (55%)</span></div>
+        <div class="ride-card-detail"><span class="label">Payment</span><span class="value" style="color:var(--primary)">Confirmed ✓</span></div>
+      </div>
+
+      <div class="ride-card" style="border-left:3px solid var(--accent)">
+        <div class="ride-card-header">
+          <span class="ride-card-route">UMich → DTW</span>
+          <span class="tag tag-full" style="background:#FFF0F0;color:#D32F2F">Cancelled</span>
+        </div>
+        <div class="ride-card-detail"><span class="label">Date</span><span class="value">Oct 19, 2026</span></div>
+        <div class="ride-card-detail"><span class="label">Reason</span><span class="value" style="color:var(--accent)">Rider left · Group dissolved</span></div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab" onclick="show('s-home')"><span class="tab-icon">🏠</span>Home</div>
+        <div class="tab"><span class="tab-icon">🔍</span>Find</div>
+        <div class="tab-create" onclick="show('s-create')">+</div>
+        <div class="tab"><span class="tab-icon">💬</span>Chat</div>
+        <div class="tab active" onclick="show('s-profile')"><span class="tab-icon">👤</span>Profile</div>
+      </div>
+    </div>
+
+    <!-- ===== 16. CALENDAR ===== -->
+    <div class="screen" id="s-calendar">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="top-nav">
+        <span class="back" onclick="show('s-home')">←</span>
+        <h2>Travel Calendar</h2>
+        <span style="width:32px"></span>
+      </div>
+
+      <div style="padding:0 20px 12px;font-size:13px;color:var(--text-3)">UMich · Fall 2026</div>
+
+      <div class="card">
+        <div class="cal-event">
+          <div class="cal-date"><span class="month">Oct</span><span class="day">19</span></div>
+          <div class="cal-info"><h4>Fall Study Break</h4><p>Oct 19–20</p><div class="cal-demand">8 students looking</div></div>
+        </div>
+        <div class="cal-event">
+          <div class="cal-date" style="background:var(--accent-light)"><span class="month" style="color:var(--accent)">Nov</span><span class="day" style="color:var(--accent)">24</span></div>
+          <div class="cal-info"><h4>Thanksgiving Recess</h4><p>Nov 25–27 · Campus closed</p><div class="cal-demand" style="color:var(--accent)">🔥 47 students looking — Very High demand</div></div>
+        </div>
+        <div class="cal-event" style="border-bottom:none">
+          <div class="cal-date" style="background:var(--accent-light)"><span class="month" style="color:var(--accent)">Dec</span><span class="day" style="color:var(--accent)">11</span></div>
+          <div class="cal-info"><h4>Winter Break / Exams End</h4><p>Dec 11–21</p><div class="cal-demand" style="color:var(--accent)">🔥 12 students looking — Very High demand</div></div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="show('s-create')">Post a Ride for a Break</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="anno" id="annotations"></div>
+</div>
+
+<script>
+const screens = [
+  { id: 's-welcome', label: 'Welcome' },
+  { id: 's-signin', label: 'Sign In' },
+  { id: 's-signup', label: 'Sign Up' },
+  { id: 's-home', label: 'Home' },
+  { id: 's-empty', label: 'Empty State' },
+  { id: 's-create', label: 'Create Ride' },
+  { id: 's-private', label: 'Private Group' },
+  { id: 's-browse', label: 'Browse Rides' },
+  { id: 's-group', label: 'Group Details' },
+  { id: 's-chat', label: 'Group Chat' },
+  { id: 's-split', label: 'Fare Split' },
+  { id: 's-rate', label: 'Rate Riders' },
+  { id: 's-notif', label: 'Notifications' },
+  { id: 's-profile', label: 'Profile' },
+  { id: 's-history', label: 'Ride History' },
+  { id: 's-calendar', label: 'Calendar' },
+];
+
+const annotations = {
+  's-welcome': { title: 'Welcome Screen', notes: 'Primary CTA: Get Started (new users). Secondary: Sign In (returning). Placeholder logo area — designer creates final logo and hero visual.' },
+  's-signin': { title: 'Sign In', notes: 'Email field validates .edu domain. Forgot Password triggers email reset flow. Links to Sign Up for new users.' },
+  's-signup': { title: 'Sign Up', notes: 'Venmo/Zelle handle is REQUIRED (not optional). Pickup address is private — visible only to future bookers. After submit → email verification screen (not shown — standard flow).' },
+  's-home': { title: 'Home Dashboard', notes: 'Shows upcoming ride card with savings %. Break calendar with live demand counts. Notification bell shows unread count. Tab bar: Home, Find, Create (+), Chat, Profile. Tapping the ride card goes to Group Details.' },
+  's-empty': { title: 'Empty State', notes: 'CRITICAL: Never show blank screen. Always show: prompt to create ride, nearest break demand count, "notify me" option. Break calendar visible even with zero rides. This is the first thing new users see — it must drive action.' },
+  's-create': { title: 'Create Ride (Path A)', notes: 'Toggle switches between Find Riders (public matching) and Invite Friends (private). Flight time is PRIMARY input — departure time + booking deadline auto-calculated and shown in the teal box below. Bags: simple count selector (0-3). Direction: two toggle buttons.' },
+  's-private': { title: 'Private Group (Path B)', notes: 'Two destination options: Configured (DTW) activates full smart flow with auto-computed times. Custom (free-text) activates manual mode — user types destination and sets departure time manually. Creates invite link to share via text/WhatsApp. .edu verification required to join.' },
+  's-browse': { title: 'Browse Available Rides', notes: 'Cards show riders with avatars, flight times, vehicle suggestion, cost per person, savings %. Tags: Open (green), Nearly Full (yellow), Full (red/disabled — grayed out, not tappable). Pickup area shown on card but NOT a matching filter — informational only for booker logistics.' },
+  's-group': { title: 'Group Details', notes: 'Pinned ride info with booking deadline countdown (shows time remaining, turns red when urgent). Rider list shows: booker badge, flight time, bag count, reliability score. Leave button with confirmation dialog. Booker sees an additional section with each rider\'s private pickup address and pickup mode toggle (shared vs. multi-stop). "Book Now" button appears here for early consensus.' },
+  's-chat': { title: 'Group Chat', notes: 'Pinned ride card at top — always visible, scrolls with chat. Shows departure, deadline countdown, vehicle, cost. "Book Now" button in pinned card for early consensus. System messages (gray, centered) for joins, leaves, status changes, deadline warnings. Chat input at bottom above tab bar.' },
+  's-split': { title: 'Fare Split Card', notes: 'Booker enters actual fare → app computes split using booker discount: 2 riders = 45/55, 3 riders = 30/35/35, 4 riders = 20/26.67 each. One-tap button copies both the dollar amount AND the booker\'s Venmo handle. Payment status section shows Paid ✓ / Pending for each rider. After 24 hours unpaid → rider gets flagged and booker is notified.' },
+  's-rate': { title: 'Rate Riders', notes: 'Two rating dimensions per rider: Reliability (did they show up?) and Punctuality (were they on time?). 1-5 stars each. Composite score feeds into profile reliability rating. Add a "Confirmed / Flaked" toggle (not shown in wireframe — designer should add a simple toggle or checkbox below the stars for each rider). Ratings are anonymous.' },
+  's-notif': { title: 'Notifications', notes: 'All 12 notification types from technical brief. Color-coded dots: teal (new/active), yellow (calendar/break), gray (read/old). Each notification is tappable — navigates to the relevant screen (e.g., "joined your group" → Group Details, "payment confirmed" → Fare Split, "Thanksgiving travel" → Calendar). Unread count shown on bell icon on Home screen.' },
+  's-profile': { title: 'Profile', notes: 'Header shows: reliability rating (composite), total rides completed, total money saved (cumulative). Address row shows "Visible to booker only" — NOT the actual address (privacy). "Ride history" link goes to the Ride History screen. Payment handle is editable. Settings gear opens account settings (edit profile, change password, notification preferences). Sign out at bottom in red.' },
+  's-history': { title: 'Ride History', notes: 'DEVELOPER/DESIGNER NOTE: Each completed ride shows: route, date, riders (names), total fare, your share, your savings ($ and %), payment status, and rating given. Cancelled rides shown with red left border and cancellation reason. Summary at top shows total rides + total saved. Cards follow the same visual pattern as Browse Rides cards but with post-ride data instead of estimates. Tapping a completed ride could expand to show more details or navigate to the rating if not yet submitted.' },
+  's-calendar': { title: 'Travel Calendar', notes: 'DEVELOPER NOTE: This is a STANDALONE screen accessible from Home (via the break calendar section) and from the tab bar or navigation. It shows ALL configured break dates for the school from the admin panel\'s breakDates config. Each event shows: date badge, event name, date range, and LIVE demand count ("47 students looking"). High-demand events get coral/red highlighting. The demand count updates in real-time as students post rides. CTA at bottom drives users to create a ride for an upcoming break. This screen is critical for solving the "90% dead" problem — it gives users a reason to open the app between breaks.' },
+};
+
+const nav = document.getElementById('screenNav');
+screens.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'screen-btn' + (s.id === 's-welcome' ? ' active' : '');
+  btn.textContent = s.label;
+  btn.onclick = () => show(s.id);
+  nav.appendChild(btn);
+});
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById(id).scrollTop = 0;
+  
+  const btns = document.querySelectorAll('.screen-btn');
+  const idx = screens.findIndex(s => s.id === id);
+  if (idx >= 0 && btns[idx]) btns[idx].classList.add('active');
+  
+  const anno = annotations[id];
+  const annoEl = document.getElementById('annotations');
+  if (anno) {
+    annoEl.innerHTML = `<h4>${anno.title}</h4><div class="note">${anno.notes}</div>`;
+  } else {
+    annoEl.innerHTML = '';
+  }
+}
+
+show('s-welcome');
+</script>
+
+</body>
+</html>
