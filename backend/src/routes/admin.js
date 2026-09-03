@@ -343,13 +343,13 @@ router.patch('/schools/:id', async (req, res, next) => {
 });
 
 // ---------- destinations ----------
-const mapDest = (d) => ({ id: String(d._id), name: d.name, code: d.code || '', type: d.type || '', address: d.address || '', directions: 'both', status: d.isActive ? 'Active' : 'Inactive' });
+const mapDest = (d) => ({ id: String(d._id), name: d.name, code: d.code || '', type: d.type || '', address: d.address || '', terminals: Array.isArray(d.terminals) ? d.terminals : [], directions: d.directions || 'both', status: d.isActive ? 'Active' : 'Inactive' });
 router.get('/destinations', async (req, res, next) => {
   try { res.json({ data: (await Destination.find({}).sort({ name: 1 }).lean()).map(mapDest) }); } catch (e) { next(e); }
 });
 router.post('/destinations', async (req, res, next) => {
   try {
-    const d = await Destination.create({ name: req.body.name, type: req.body.type || req.body.area || 'campus', address: req.body.address || '', isActive: req.body.status ? req.body.status === 'Active' : true });
+    const d = await Destination.create({ name: req.body.name, code: req.body.code || '', type: req.body.type || req.body.area || 'campus', address: req.body.address || '', terminals: Array.isArray(req.body.terminals) ? req.body.terminals : [], directions: req.body.directions || 'both', isActive: req.body.status ? req.body.status === 'Active' : true });
     res.status(201).json(mapDest(d.toObject()));
   } catch (e) { next(e); }
 });
@@ -357,7 +357,7 @@ router.patch('/destinations/:id', async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: 'Invalid id' });
     const upd = {};
-    ['name', 'type', 'address'].forEach((k) => { if (req.body[k] != null) upd[k] = req.body[k]; });
+    ['name', 'type', 'address', 'code', 'directions', 'terminals'].forEach((k) => { if (req.body[k] != null) upd[k] = req.body[k]; });
     if (req.body.status != null) upd.isActive = req.body.status === 'Active';
     const d = await Destination.findByIdAndUpdate(req.params.id, { $set: upd }, { new: true }).lean();
     if (!d) return res.status(404).json({ error: 'Destination not found' });
@@ -485,7 +485,15 @@ router.post('/notifications', async (req, res, next) => {
 // ---------- settings ----------
 async function getSettings() {
   const doc = await PlatformSetting.findOne({ key: 'admin_settings' }).lean();
-  return { ...DEFAULT_SETTINGS, ...(doc ? doc.value : {}), notificationTriggers: { ...DEFAULT_SETTINGS.notificationTriggers, ...((doc && doc.value && doc.value.notificationTriggers) || {}) }, lastUpdated: doc ? doc.updatedAt : null };
+  const admins = await User.find({ role: 'admin' }).select('name email role isActive').lean();
+  const adminAccounts = admins.map((a) => ({ id: String(a._id), name: a.name || 'Admin', email: a.email, role: 'Super Admin', status: a.isActive ? 'Active' : 'Inactive' }));
+  return {
+    ...DEFAULT_SETTINGS,
+    ...(doc ? doc.value : {}),
+    notificationTriggers: { ...DEFAULT_SETTINGS.notificationTriggers, ...((doc && doc.value && doc.value.notificationTriggers) || {}) },
+    adminAccounts,
+    lastUpdated: doc ? doc.updatedAt : null,
+  };
 }
 router.get('/settings', async (req, res, next) => { try { res.json(await getSettings()); } catch (e) { next(e); } });
 router.patch('/settings', async (req, res, next) => {
@@ -493,6 +501,7 @@ router.patch('/settings', async (req, res, next) => {
     const current = await getSettings();
     const merged = { ...current, ...req.body };
     delete merged.lastUpdated;
+    delete merged.adminAccounts; // derived from the users collection, never stored here
     await PlatformSetting.updateOne({ key: 'admin_settings' }, { $set: { value: merged, description: 'Admin platform settings' } }, { upsert: true });
     // Keep the matching engine in sync.
     if (merged.matchingTimeWindowMinutes != null) await PlatformSetting.updateOne({ key: 'matchWindowMinutes' }, { $set: { value: merged.matchingTimeWindowMinutes } }, { upsert: true });
@@ -504,7 +513,7 @@ router.patch('/settings', async (req, res, next) => {
 router.post('/settings/reset', async (req, res, next) => {
   try {
     await PlatformSetting.updateOne({ key: 'admin_settings' }, { $set: { value: DEFAULT_SETTINGS } }, { upsert: true });
-    res.json({ ...DEFAULT_SETTINGS });
+    res.json(await getSettings());
   } catch (e) { next(e); }
 });
 
