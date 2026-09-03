@@ -1,4 +1,14 @@
-import Placeholder from '@/components/Placeholder';
+import { View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import ScreenHeader from '@/components/ScreenHeader';
+import RideBrowseList from '@/components/RideBrowseList';
+
 export default function Browse() {
-  return <Placeholder title="Browse Rides" icon="list-outline" subtitle="Available ride groups matching your trip. Arrives in Phase 2." />;
+  const { rideId } = useLocalSearchParams();
+  return (
+    <View className="flex-1 bg-bg">
+      <ScreenHeader title="Available Rides" testID="browse-header" />
+      <RideBrowseList rideId={rideId} />
+    </View>
+  );
 }

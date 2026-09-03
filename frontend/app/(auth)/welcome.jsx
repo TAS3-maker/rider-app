@@ -2,6 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Plane } from 'lucide-react-native';
 
 export default function Welcome() {
   const insets = useSafeAreaInsets();
@@ -13,7 +14,7 @@ export default function Welcome() {
         style={{ paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 }}
       >
         <View className="mt-auto">
-          <Text className="text-[64px] mb-5">✈️</Text>
+          <Plane size={60} color="#FFFFFF" strokeWidth={1.5} style={{ marginBottom: 20 }} />
           <Text testID="welcome-logo" className="text-[36px] font-extrabold text-white mb-2 tracking-tight">
             RidePact
           </Text>

@@ -2,6 +2,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
+import { Plane } from 'lucide-react-native';
 
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -15,7 +16,7 @@ export default function Home() {
           testID="home-notifications"
           onPress={() => router.push('/notifications')}
           className="w-8 h-8 rounded-full bg-white items-center justify-center"
-          style={{ shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 2 }}
+          style={{ boxShadow: '0px 1px 3px rgba(0,0,0,0.06)', elevation: 2 }}
         >
           <Ionicons name="notifications-outline" size={16} color="#1A1A2E" />
         </Pressable>
@@ -28,7 +29,9 @@ export default function Home() {
 
         {/* Phase 0 empty state (ride discovery/creation lands in Phase 2) */}
         <View className="items-center px-8 py-8">
-          <Text className="text-[48px] mb-4">✈️</Text>
+          <View className="w-20 h-20 rounded-full bg-primary-light items-center justify-center mb-4">
+            <Plane size={34} color="#3AAFA9" strokeWidth={1.5} />
+          </View>
           <Text className="text-lg font-bold text-text mb-2">No rides yet</Text>
           <Text className="text-sm text-text-3 text-center leading-5 mb-5 max-w-[260px]">
             Post your trip and we'll notify you when someone matches your flight time.
@@ -47,7 +50,7 @@ export default function Home() {
         <Text className="px-5 pt-2 pb-2 text-[13px] font-bold text-text-3 uppercase tracking-wide">
           Upcoming Travel
         </Text>
-        <View className="mx-5 rounded-[14px] bg-white p-4" style={{ shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 2 }}>
+        <View className="mx-5 rounded-[14px] bg-white p-4" style={{ boxShadow: '0px 1px 3px rgba(0,0,0,0.06)', elevation: 2 }}>
           <Text className="text-sm text-text-3">
             Travel calendar events will appear here once your school adds them.
           </Text>

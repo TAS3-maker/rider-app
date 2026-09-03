@@ -38,13 +38,7 @@ export default function TabBar({ state, navigation }) {
               testID="tab-create-button"
               onPress={() => go('create')}
               className="w-12 h-12 rounded-full bg-primary items-center justify-center -mt-5"
-              style={{
-                shadowColor: '#3AAFA9',
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 6,
-              }}
+              style={{ boxShadow: '0px 4px 12px rgba(58,175,169,0.30)', elevation: 6 }}
             >
               <Ionicons name="add" size={28} color="#fff" />
             </Pressable>

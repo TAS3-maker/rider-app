@@ -56,7 +56,7 @@ export default function Profile() {
 
         <View
           className="mx-5 rounded-[14px] bg-white overflow-hidden mb-5"
-          style={{ shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 2 }}
+          style={{ boxShadow: '0px 1px 3px rgba(0,0,0,0.06)', elevation: 2 }}
         >
           <Row icon="person-outline" label="Username" value={user?.username} />
           <Row icon="card-outline" label="Payment handle" value={user?.paymentHandle} />
@@ -64,7 +64,16 @@ export default function Profile() {
           <Row icon="call-outline" label="Phone" value={user?.phone} />
         </View>
 
-        <View className="px-5">
+        <View className="px-5 gap-2.5">
+          <Pressable
+            testID="profile-ride-history"
+            onPress={() => router.push('/ride-history')}
+            className="flex-row items-center bg-white rounded-[14px] px-4 py-4 border border-border"
+          >
+            <Ionicons name="time-outline" size={20} color="#3AAFA9" />
+            <Text className="ml-3 flex-1 text-[15px] font-semibold text-text">Ride History</Text>
+            <Ionicons name="chevron-forward" size={18} color="#8A8A9A" />
+          </Pressable>
           <Button title="Log Out" variant="outline" onPress={onLogout} testID="profile-logout" />
         </View>
       </ScrollView>

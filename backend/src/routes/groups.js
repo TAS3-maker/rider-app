@@ -1,12 +1,18 @@
-// Ride group routes — Phase 0 placeholders (logic added in Phase 2).
 const router = require('express').Router();
 const { requireAuth } = require('../middleware/auth');
+const c = require('../controllers/groupController');
 
 router.use(requireAuth);
 
-router.get('/', (req, res) => res.json({ data: [], message: 'Groups — coming in Phase 2' }));
-router.get('/:id', (req, res) => res.status(501).json({ error: 'Group details — coming in Phase 2' }));
-router.post('/:id/join', (req, res) => res.status(501).json({ error: 'Join group — coming in Phase 2' }));
-router.post('/:id/leave', (req, res) => res.status(501).json({ error: 'Leave group — coming in Phase 2' }));
+router.get('/', c.browse);
+router.post('/', c.create);
+router.get('/:id', c.getGroup);
+router.post('/:id/join', c.join);
+router.post('/:id/leave', c.leave);
+router.post('/:id/booker', c.setBooker);
+router.post('/:id/book', c.book);
+router.post('/:id/complete', c.complete);
+router.post('/:id/cancel', c.cancel);
+router.post('/:id/cab-cancelled', c.cabCancelled);
 
 module.exports = router;

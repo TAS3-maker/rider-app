@@ -56,6 +56,29 @@ multi-language, external CRM.
 - University: State University — domain `university.edu`
 - Test student: jdoe@university.edu / Passw0rd! (verified)
 
+## Implemented (2026-09-03) — Phase 2: Ride Coordination (backend + mobile)
+- Models extended: Ride (student/flightInfo/passengerCount/flags), RideGroup (rides/members/
+  vehicleCapacity/bookerId/fareRecord/pickupMode/times/edge-flags), GroupMember (overdue/
+  leftAfterBooking), FareRecord (shares/percent/finalized/fareChanged); Airport.baseFare.
+- Rule-based matching engine (matchingEngine.js): same university→direction→airport→travel
+  date→flight-time window→capacity→luggage→open status, ranked; computes suggested departure
+  & booking deadline; vehicle suggestion.
+- groupService.js orchestration: create/join (capacity + status open→nearly_full→full),
+  leave (booker transfer/vacancy flag, dissolve on empty), assign/transfer booker, book,
+  enter fare (even split, fareChanged preserves confirmations), confirm payment, complete,
+  cancel, cab-cancelled — each with EventLog + notifications. Booker-only pickup addresses.
+- Edge cases as flags: overdue, leftAfterBooking, noBookerFlag, adminFlag, cabCancelled,
+  rematchNeeded (flight/pickup change), full→409, no-match→own group, ranked multi-match.
+- Endpoints: /rides (create/history/matches/update/cancel), /groups (browse/get/create/join/
+  leave/booker/book/complete/cancel/cab-cancelled), /fares (get/enter/confirm), /matching.
+  Browse + history paginated (page/limit/total/totalPages).
+- Mobile screens (NativeWind, lucide icons, no emoji, safe-area, responsive): Create Ride
+  (mode/direction/airport/time/date/bags/flexible/pickup + auto-calc box), Browse Rides
+  (infinite scroll, status tags teal/yellow/red, full grayed), Group Details (live countdown,
+  riders, booker pickups, join/leave-modal/book), Fare Split (enter fare, shares, copy-to-pay,
+  paid/pending, complete), Ride History (summary + paginated cards, cancelled red border).
+- Verified: 43/43 backend tests + all 5 mobile screens.
+
 ## Backlog (next phases per SOW)
 ### Phase 1 (finish Foundation)
 - P1: Profile edit screen (mobile) wired to PATCH /users/me; admin university/domain CRUD UI.

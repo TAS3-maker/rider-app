@@ -1,0 +1,41 @@
+{
+  "summary": "RidePact Phase 2 (Ride Coordination) full-stack test. Backend: 21/21 new Phase 2 pytest cases pass covering matching (public/private, same-uni+dir+airport+date, 120-min window), group create/join/leave, capacity 4/4 → 409, pickup-address gating to booker, browse pagination, fare enter (booker-only, sum=total, re-entry sets fareChanged and preserves prior paymentConfirmed), booker confirm-on-behalf, book/complete lifecycle, history summary (completedRides/totalSaved), rematchNeeded on flightTime PATCH, and noBookerFlag on booker-leave. Also 22/22 Phase 0 tests still green → 43/43 total. Mobile: sign-in → Home → Create Ride (mode+direction toggles, airport chips ATL/DTW/JFK/LAX/ORD, hour/min/AM-PM, day chips, bags, flexible, live-updating departure ~11:45 AM and Book-by 9:45 AM · Sep 9, 2026) → Post Ride creates own group and lands on Group Details (route, status tag Open · 1/4, booking-deadline countdown, BOOKER badge, reliability ★, booker-only pickup section, Book Now/Group Chat/Leave). Browse (paginated cards) and Ride History (summary header) render correctly. No emoji in UI (lucide icons), safe-area insets applied on all Phase 2 screens, no deprecated Expo packages (expo-av / expo-barcode-scanner / expo-background-fetch).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Group Details – Pickup Addresses", "issues": ["Booker's own pickup shows 'No address provided' because Create Ride does not collect a pickupLocation from the ride form and the user record has no pickupPreferences. Consider surfacing/reusing profile pickupAddress or adding a pickup field to Create Ride."]},
+      {"screen": "Browse Rides", "issues": ["When a group has only the booker (1/4), 'Save ~0% vs. riding solo' displays. Cosmetic – hide the savings row until memberCount >= 2 or when savingsPct <= 0."]}
+    ],
+    "react_native_issues": [
+      {"component": "TabBar.jsx / profile.jsx inline shadow*", "issue": "Deprecated shadow* style props deprecation warning still emitted on web (unchanged since iteration 1). Reference: /app/frontend/components/TabBar.jsx:41-47 and /app/frontend/app/(tabs)/profile.jsx:59"}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ridepact_phase2.py",
+    "/app/backend/tests/test_ridepact_backend.py",
+    "/app/test_reports/pytest/phase2_results.xml"
+  ],
+  "action_items": [
+    "(Optional polish) Populate booker's pickupAddress: either default ride.pickupLocation from user.pickupPreferences on ride creation, or add a pickup field to the Create Ride screen. Currently the booker's pickup renders 'No address provided'.",
+    "(Optional polish) In Browse Rides / Group Details, suppress the 'Save ~0% vs. riding solo' line when memberCount < 2 or savingsPct == 0.",
+    "(Carried over from iteration_1) Replace RN inline shadow* style props with `boxShadow` (or Platform.OS split) in TabBar.jsx and profile.jsx to silence the RN web deprecation warning."
+  ],
+  "critical_code_review_comments": [
+    "rideController.createRide accepts any airport ObjectId without validating it belongs to an isActive airport — invalid airport ids would create rides that can never match. Consider validating against Airport collection.",
+    "rideController.updateRide only triggers rematch when `ride.group` is populated on the Ride doc; ensure this reference is kept in sync when a ride joins a group (currently done in groupService.joinGroup — verified working via test_flight_time_change_sets_rematch)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ridepact_phase2.py"
+  ],
+  "success_rate": {"backend": "100% (21/21 Phase 2, 43/43 overall)", "frontend": "100% (Create → Group → Browse → History flows verified on 375x667 mobile viewport)"},
+  "seed_data_creation": "Each run registers a fresh Student B (email prefix qa_<random>@university.edu, verified via devVerificationCode) and 4 more extras for the capacity-409 test. All future-dated rides. No teardown implemented — accepted for dev DB.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Phase 2 backend endpoints under /api/{rides,groups,fares} are stable. Direction enum values are `university_to_airport` / `airport_to_university` (NOT `to_airport`). Fare response shape is `data.fare.{shares,fareChanged,totalCost,perRiderShare}` with each share `{user,amount,percent,paymentConfirmed}`. Group serializeGroup already exposes `noBookerFlag`, `rematchNeeded`, `isCurrentUserBooker`, and only fills `members[i].pickupAddress` when the caller is the booker. To reuse the phase2 test file, run: `pytest /app/backend/tests/test_ridepact_phase2.py -o addopts='-n 0'` — the module-scoped state fixture requires serial execution (backend/pytest.ini defaults to -n 2 --dist loadscope).",
+  "rca_of_issue": "N/A — no failing feature. Only two cosmetic polish items surfaced during UI walkthrough (booker pickup empty on solo groups; 0% savings row shown for 1/4 groups)."
+}
