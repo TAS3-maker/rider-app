@@ -1,0 +1,55 @@
+{
+  "summary": "RidePact Phase 4 (Admin API) backend test. 63/65 pytest cases pass covering full RBAC matrix (13 admin endpoints × student=403 & admin=200 + unauth=401), dashboard numeric contract (totalUsers/activeStudents/activeTrips/completedRides/cancelledRides/activeGroups/upcomingEvents/avgRidersPerGroup/avgReliability/matchToCompleteRate all present & numeric — no undefined), users list/search/status/verification filters + mapped shape + get-by-id + invalid-id→400 + 404 + /users/:id/rides + PATCH /status deactivate→GET verify→reactivate, trips list+shape+get+status filter, groups list+shape+riders array+get, event-log list+shape, schools list + POST create (201) + duplicate domain→409 + PATCH school (partial FAILURE — shortName not persisted, see rca), destinations CRUD + status Active↔Inactive + invalid-id→400, pickups CRUD + duplicate code→409 + PATCH baseFare/status, break calendar list with demandCount+demand level + POST create + PATCH + trigger-notification broadcasts to students (partial FAILURE — notification14dSent flag not persisted) + soft-delete via DELETE + invalid-id→400, broadcast notifications POST returns deliveredCount (verified student jdoe receives the announcement in /api/notifications) + /notifications/history aggregates title/message/deliveredCount/totalAudience + 400 on missing message, settings GET returns merged defaults, PATCH persists matchingTimeWindowMinutes & syncs matchWindowMinutes PlatformSetting + GET re-verifies, POST /settings/reset restores defaults (verified numeric matches DEFAULT_SETTINGS), resolutions GET shape {bookerNeeded[],missingInfo[],paymentDisputes[],fareDisputes[]} + resolve/assign endpoints validate ObjectId→400. All 13 /api/admin/* routes properly gated by role=admin (student jdoe@university.edu → 403; admin@ridepact.com → 200). Invalid ObjectId params return 400 (not 500) on all tested routes. Frontend NOT tested per review scope.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "PATCH /api/admin/schools/:id",
+        "issue": "shortName (and address, notes) fields are declared in admin routes but MISSING from University Mongoose schema (/app/backend/src/models/University.js). Because Mongoose strict mode drops unknown paths, `$set: { shortName }` silently no-ops — PATCH returns 200 but the value never persists (response falls back to `s.shortName || s.name`, showing the full name). Same latent issue on POST /schools with shortName/address/notes. Add these fields to the University schema: `shortName: { type: String, default: '' }`, `address: { type: String, default: '' }`, `notes: { type: String, default: '' }`.",
+        "priority": "MEDIUM"
+      },
+      {
+        "endpoint": "POST /api/admin/events/calendar/:id/trigger-notification",
+        "issue": "notification14dSent / notification3dSent flags are set via `$set` but MISSING from the TravelEvent schema (/app/backend/src/models/TravelEvent.js). The Notification.insertMany side-effect DOES fire (students receive reminders), but the flag on the event never sticks — response returns `notification14dSent: false` after a 14d trigger, and repeat triggers will spam students. Add both boolean fields to the schema (default: false).",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ridepact_phase4_admin.py",
+    "/app/test_reports/pytest/phase4_results.xml"
+  ],
+  "action_items": [
+    "Extend /app/backend/src/models/University.js schema with `shortName`, `address`, `notes` (String, default '') so POST/PATCH /admin/schools actually persist those fields.",
+    "Extend /app/backend/src/models/TravelEvent.js schema with `notification14dSent` and `notification3dSent` (Boolean, default false) so /trigger-notification is idempotent and the response reflects reality.",
+    "(Optional hardening) In admin.js `mapGroup`, `noBookerFlag` / `adminFlag` on RideGroup are read but I did not verify those exist on the RideGroup schema — same silent-drop risk. Recommend a quick audit of every admin field vs its Mongoose schema.",
+    "(Optional) Admin CRUD for schools/destinations/pickups/travel-events lacks Pydantic-style body validation. Empty/invalid payloads currently bounce off Mongoose (500 possible). Consider adding zod/express-validator."
+  ],
+  "critical_code_review_comments": [
+    "Admin router mounts middleware globally with `router.use(...adminAuth)` — correct pattern, verified every listed endpoint 403s a student token.",
+    "`GET /admin/trips` direction filter has odd logic: `String(direction).includes('campus') && ... indexOf('campus') === 0 ? 'university_to_airport' : req.query.direction` — this leaks the raw client value into the Mongo query when it does NOT start with 'campus'. Not exploitable (schema-strict), but confusing. Consider a whitelist: {to_campus,to_airport,airport_to_university,university_to_airport}.",
+    "`GET /admin/groups/:id`, `/admin/trips/:id` accept ids prefixed with '#' but fall back to `RideGroup.findOne({})`/`Ride.findOne({})` (arbitrary first doc) when the id is non-ObjectId. That means a request like GET /admin/trips/garbage returns a random trip instead of 400/404. Should return 400 when `isValidObjectId` is false — same rule already applied consistently to other routes.",
+    "`getSettings()` spreads `DEFAULT_SETTINGS` shallowly over the DB doc — nested `notificationTriggers` from DB will completely replace defaults instead of merging. If a partial notificationTriggers is stored, missing keys will read as undefined on the client.",
+    "`POST /admin/notifications` inserts one Notification per active student (29 today) synchronously; fine for now but should be paginated/backgrounded when audience grows.",
+    "`POST /admin/resolutions/payment/:groupId/resolve` uses `'shares.$[].overdue': false` with `arrayFilters` NOT set — verify against your MongoDB version; on older drivers this could fail silently. Not exercised by these tests (no fare-record fixture)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ridepact_phase4_admin.py",
+    "/app/test_reports/pytest/phase4_results.xml"
+  ],
+  "success_rate": {
+    "backend": "96.9% (63/65 Phase 4 admin tests). Both failures are real backend schema gaps described above, not test issues.",
+    "frontend": "not tested this phase per scope"
+  },
+  "seed_data_creation": "Each run creates one TEST_University_<rand> (unique domain, retained for the run), one TEST_Dest_<rand> destination, one TEST_Airport_<rand> pickup with a random 3-letter code, one TEST_Break_<rand> travel event (soft-deleted at end), and one TEST_Announcement_<rand> notification broadcast (aggregated by title in history). jdoe@university.edu is briefly deactivated then reactivated. No teardown for created schools/destinations/pickups — safe for dev DB.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run: `pytest /app/backend/tests/test_ridepact_phase4_admin.py -o addopts='-n 0' -v`. All 13 admin endpoints are parameterised in TestAdminRBAC — cheapest way to verify role gating hasn't regressed. After main agent adds `shortName/notification*Sent` to schemas + `sudo supervisorctl restart backend`, the two failing tests (`TestSchools::test_patch_school`, `TestBreakCalendar::test_full_crud_and_soft_delete_and_notify`) should turn green with no test changes. Notification history is aggregated by (title, body), so re-running the same announcement text bumps deliveredCount rather than creating a new row.",
+  "rca_of_issue": "1) PATCH /admin/schools shortName-not-persisting: University Mongoose schema (/app/backend/src/models/University.js) declares only {name, emailDomain, city, state, isActive}. Admin route builds `upd.shortName = req.body.shortName` and calls findByIdAndUpdate($set: upd). Mongoose default `strict: true` drops paths not in the schema, so the update is a no-op; the response then falls back to `s.shortName || s.name` in mapSchool → returns the full name. Reproduce: `curl -X POST /api/admin/schools -d '{\"name\":\"X\",\"shortName\":\"XS\",\"domain\":\"x-<rand>.edu\"}'` then `curl -X PATCH /api/admin/schools/<id> -d '{\"shortName\":\"XS2\"}'` → response.shortName == 'X'. Fix: add `shortName/address/notes: {type: String, default: ''}` to University schema. 2) trigger-notification flag: TravelEvent schema lacks `notification14dSent` / `notification3dSent`; same strict-drop happens. The Notification.insertMany fan-out still executes so students get the reminder, but the event's `notification14dSent` stays false forever and admin UI cannot disable the button. Fix: add both Boolean(default:false) fields to TravelEvent schema."
+}

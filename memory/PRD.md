@@ -98,6 +98,21 @@ multi-language, external CRM.
 - SocketContext reuses the single socket client + auth token; exposes unread count.
 - Verified: 63/63 backend tests + all Phase 3 screens.
 
+## Implemented (2026-09-03) — Phase 4: Admin business functionality (backend + wiring)
+- New comprehensive `/api/admin/*` router (all admin-only via adminAuth) mapping real Mongo
+  data to the admin-web's existing service shapes — no admin UI redesign; existing service
+  layer already targeted these endpoints.
+- Dashboard stats (real counts + derived), Users (search/filter/detail/rides/activate-deactivate),
+  Trips, Groups, Event Logs (filterable), Schools CRUD (University), Destinations CRUD,
+  Pickups/Airports CRUD, Break Calendar CRUD + trigger-notification (fan-out to students),
+  Notifications broadcast + history aggregation, Settings get/patch/reset (syncs matching window
+  + capacity PlatformSettings), and resolution flows (booker-needed queue, payment/fare disputes,
+  missing-info) with assign/resolve actions + EventLog.
+- Schema fills: University.shortName/address/notes, TravelEvent.notification14d/3dSent.
+- Verified: 65/65 admin backend tests; live admin panel at /api/admin-panel renders real data.
+- Note: admin lists return arrays (existing client-side pagination preserved) but accept
+  ?page&limit and are capped; admin Sidebar icons are the pre-existing UI (untouched this phase).
+
 ## Backlog (next phases per SOW)
 ### Phase 1 (finish Foundation)
 - P1: Profile edit screen (mobile) wired to PATCH /users/me; admin university/domain CRUD UI.

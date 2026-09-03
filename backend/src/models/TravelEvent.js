@@ -11,6 +11,8 @@ const travelEventSchema = new mongoose.Schema(
     type: { type: String, enum: Object.values(TRAVEL_EVENT_TYPE), default: TRAVEL_EVENT_TYPE.HOLIDAY },
     visible: { type: Boolean, default: true },
     demandCount: { type: Number, default: 0 },
+    notification14dSent: { type: Boolean, default: false },
+    notification3dSent: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
