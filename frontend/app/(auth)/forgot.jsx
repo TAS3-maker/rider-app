@@ -58,7 +58,7 @@ export default function Forgot() {
       <ScrollView keyboardShouldPersistTaps="handled">
         <View className="px-5 pt-4 pb-6">
           <Text className="text-[26px] font-extrabold text-text mb-1">Reset password</Text>
-          <Text className="text-sm text-text-3">We'll help you get back in</Text>
+          <Text className="text-sm text-text-3">We&rsquo;ll help you get back in</Text>
         </View>
 
         <Input label="Email" value={email} onChangeText={setEmail} placeholder="you@university.edu" keyboardType="email-address" testID="forgot-email" />

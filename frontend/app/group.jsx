@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { Star, MapPin, Clock, Car, Luggage, TrendingDown, LogOut, MessageCircle, UserCheck, Receipt } from 'lucide-react-native';
+import { Star, MapPin, Car, TrendingDown, LogOut, MessageCircle, UserCheck, Receipt } from 'lucide-react-native';
 import { groupsApi } from '@/api/rides';
 import { useAuth } from '@/context/AuthContext';
 import StatusTag from '@/components/StatusTag';
@@ -194,7 +194,7 @@ export default function GroupDetails() {
                 </Pressable>
               ) : null}
               <View className="flex-row gap-2.5">
-                <Pressable testID="group-chat" onPress={() => router.push('/group-chat')} className="flex-1 py-3.5 rounded-[12px] bg-white border border-border items-center flex-row justify-center gap-2">
+                <Pressable testID="group-chat" onPress={() => router.push({ pathname: '/group-chat', params: { groupId: id } })} className="flex-1 py-3.5 rounded-[12px] bg-white border border-border items-center flex-row justify-center gap-2">
                   <MessageCircle size={17} color="#1A1A2E" />
                   <Text className="text-[15px] font-semibold text-text">Group Chat</Text>
                 </Pressable>

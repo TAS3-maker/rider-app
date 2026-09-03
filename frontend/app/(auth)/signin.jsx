@@ -78,7 +78,7 @@ export default function SignIn() {
           </View>
 
           <View className="flex-row justify-center mt-4">
-            <Text className="text-[13px] text-text-3">Don't have an account? </Text>
+            <Text className="text-[13px] text-text-3">Don&rsquo;t have an account? </Text>
             <Pressable testID="signin-goto-signup" onPress={() => router.replace('/(auth)/signup')}>
               <Text className="text-[13px] font-semibold text-primary">Sign Up</Text>
             </Pressable>

@@ -71,7 +71,7 @@ export default function FareSplit() {
     act(async () => { await faresApi.enter(groupId, val); });
   };
   const confirmMine = () => act(async () => { await faresApi.confirm(groupId); });
-  const completeRide = () => act(async () => { await groupsApi.complete(groupId); router.push('/rate'); });
+  const completeRide = () => act(async () => { await groupsApi.complete(groupId); router.push({ pathname: '/rate', params: { groupId } }); });
 
   const copyPay = async () => {
     if (!myShare) return;
@@ -180,7 +180,7 @@ export default function FareSplit() {
           <View className="px-5 gap-2.5">
             {myShare && !myShare.paymentConfirmed ? (
               <Pressable testID="fare-mark-paid" onPress={confirmMine} disabled={busy} className="w-full py-4 rounded-[14px] bg-white border-[1.5px] border-primary items-center">
-                <Text className="text-base font-semibold text-primary-dark">I've Paid → Mark Confirmed</Text>
+                <Text className="text-base font-semibold text-primary-dark">I&rsquo;ve Paid &rarr; Mark Confirmed</Text>
               </Pressable>
             ) : null}
             {isBooker && group.status !== 'completed' ? (

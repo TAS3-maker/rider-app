@@ -9,6 +9,7 @@ const { Server } = require('socket.io');
 const env = require('./config/env');
 const { connectDB } = require('./config/db');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
+const { verifyToken } = require('./middleware/auth');
 const notificationService = require('./services/notificationService');
 const registerChat = require('./sockets/chat');
 const registerNotifications = require('./sockets/notifications');
@@ -65,7 +66,18 @@ app.use('/api', notFound);
 app.use(errorHandler);
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' }, path: '/socket.io' });
+const io = new Server(server, { cors: { origin: '*' }, path: '/api/socket.io' });
+// Authenticate every socket via the JWT passed in the handshake.
+io.use((socket, next) => {
+  try {
+    const token = (socket.handshake.auth && socket.handshake.auth.token) || (socket.handshake.query && socket.handshake.query.token);
+    const payload = verifyToken(token);
+    socket.userId = payload.sub;
+    next();
+  } catch (e) {
+    next(new Error('unauthorized'));
+  }
+});
 notificationService.setIo(io);
 registerChat(io);
 registerNotifications(io);

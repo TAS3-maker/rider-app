@@ -41,4 +41,13 @@ function requireRole(...roles) {
       : res.status(403).json({ error: 'Forbidden' });
 }
 
-module.exports = { signAccessToken, requireAuth, requireRole };
+// Verify a raw JWT (used by the Socket.IO handshake). Throws on failure.
+function verifyToken(token) {
+  return jwt.verify(token, env.JWT_SECRET, {
+    algorithms: ['HS256'],
+    issuer: env.JWT_ISSUER,
+    audience: env.JWT_AUDIENCE,
+  });
+}
+
+module.exports = { signAccessToken, requireAuth, requireRole, verifyToken };

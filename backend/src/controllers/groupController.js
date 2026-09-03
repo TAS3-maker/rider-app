@@ -1,6 +1,7 @@
 const { RideGroup, Ride, GroupMember } = require('../models');
 const { GROUP_STATUS, GROUP_TYPE, ROLES } = require('../config/constants');
 const groupService = require('../services/groupService');
+const chatService = require('../services/chatService');
 
 function getPage(req) {
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -72,6 +73,7 @@ async function join(req, res, next) {
       return res.status(400).json({ error: 'Ride is not compatible with this group' });
     }
     await groupService.joinGroup(group, ride, req.user._id);
+    await chatService.postSystem(group._id, `${req.user.name || 'A rider'} joined the group`);
     const view = await groupService.serializeGroup(group._id, req.user._id);
     res.json({ data: view });
   } catch (e) {
@@ -85,6 +87,7 @@ async function leave(req, res, next) {
     const group = await RideGroup.findById(req.params.id);
     if (!group) return res.status(404).json({ error: 'Group not found' });
     await groupService.leaveGroup(group, req.user._id);
+    await chatService.postSystem(group._id, `${req.user.name || 'A rider'} left the group`);
     res.json({ data: { left: true } });
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.message });
@@ -126,6 +129,7 @@ async function book(req, res, next) {
     if (!group) return res.status(404).json({ error: 'Group not found' });
     if (!bookerOnly(group, req, res)) return;
     await groupService.bookGroup(group, req.user._id);
+    await chatService.postSystem(group._id, 'Cab booked — check the fare split');
     res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.message });
@@ -139,6 +143,7 @@ async function complete(req, res, next) {
     if (!group) return res.status(404).json({ error: 'Group not found' });
     if (!bookerOnly(group, req, res)) return;
     await groupService.completeGroup(group, req.user._id);
+    await chatService.postSystem(group._id, 'Ride marked complete');
     res.json({ data: await groupService.serializeGroup(group._id, req.user._id) });
   } catch (e) {
     next(e);

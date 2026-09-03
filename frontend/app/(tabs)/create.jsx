@@ -219,7 +219,7 @@ export default function CreateRide() {
 
           <View className="px-5 mb-4">
             <Pressable testID="create-flexible" onPress={() => setFlexible((f) => !f)} className="flex-row items-center justify-between bg-white rounded-[10px] px-4 py-3.5 border border-border">
-              <Text className="text-[14px] text-text">I'm flexible on timing</Text>
+              <Text className="text-[14px] text-text">I&rsquo;m flexible on timing</Text>
               <View className={`w-11 h-6 rounded-full px-0.5 justify-center ${flexible ? 'bg-primary' : 'bg-border'}`}>
                 <View className={`w-5 h-5 rounded-full bg-white ${flexible ? 'self-end' : 'self-start'}`} />
               </View>
@@ -251,7 +251,7 @@ export default function CreateRide() {
             </Pressable>
             {mode === 'private' ? (
               <Text className="text-center text-[12px] text-text-3 mt-2 px-6">
-                Share the link with friends. They'll need a .edu email to join.
+                Share the link with friends. They&rsquo;ll need a .edu email to join.
               </Text>
             ) : null}
           </View>

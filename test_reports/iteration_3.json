@@ -1,0 +1,46 @@
+{
+  "summary": "RidePact Phase 3 (Chat + Notifications + Ratings + Calendar) full-stack test. Backend: 20/20 new Phase 3 pytest cases pass covering chat GET (paginated, newest-first, 403 non-member), chat POST (persists + returns Message), system messages ('...joined the group' auto-inserted on join), Socket.IO real-time delivery via polling transport at path '/api/socket.io' with JWT auth (unauth rejected, member receives chat:message when peer posts via REST), notifications list shape {page, limit, total, totalPages, unread}, /unread-count, /read-all, /:id/read, user_joined + chat_message notification types generated correctly, ratings /pending shape (userId/name/initials/alreadyRated) + missing-groupId 400 + submit + duplicate-409 + self-rate 400 + invalid-star 400 + reliabilityScore rolling-avg recompute (4+5 stars → 4.5), calendar paginated with demandCount & highDemand (>=5 rides), student 403 on POST/DELETE, admin CRUD + soft delete (visible=false hides from list). Also 43/43 prior phases (0+2) still green. Mobile: sign-in → Home renders 'YOUR UPCOMING RIDE' + 'UPCOMING BREAKS' preview (Fall Study Break 6 · Thanksgiving 0 · Winter 1) with Fall Study Break highlighted coral (#FF6B6B) as high-demand; notification bell top-right opens Notifications screen (paginated list with lucide icon per type + status dot; teal active, gray read); 'mark all read' (CheckCircle2 icon) clears unread and home badge stays cleared. Chat tab lists 17 ride groups (paginated cards, Open/Full/Completed badges). Group Chat screen shows pinned ride-info card with route, ~depart 12:15 PM, book-by countdown '10:15 AM (11d 22h left)', UberX · per person $28.5, 'Save ~50% · Book Now' Pressable; system message rendered centered/gray with Info icon ('A rider joined the group', no emoji); sending 'phase3 ui msg' appears immediately in inverted list. Calendar screen renders date-badge cards (OCT 12 / NOV 25 / DEC 18) with title, date range, live 'N students looking' demand text, coral border on high-demand Fall Study Break, 'Post a Ride for a Break' button. Rate screen renders correctly (empty 'All set' after test rating). No emoji anywhere — lucide icons only. Safe-area insets respected. WebSocket upgrade is blocked by the ingress (expected per review note) — socket.io correctly falls back to long-polling and delivers real-time events. Deprecated packages detected: none (no expo-av/expo-barcode-scanner/expo-background-fetch).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/ratings/pending?groupId=undefined", "issue": "When frontend sends the literal string 'undefined' (or an invalid 24-char id), backend throws Mongoose CastError → 500 instead of a 400. Should validate ObjectId format before Mongo query. Reference: /app/backend/src/routes/ratings.js:16"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Travel Calendar demand text", "issue": "Copy always uses plural: 'N students looking' — reads '1 students looking'. Pluralize based on count.", "testID": "N/A (calendar.jsx demand row)", "priority": "LOW"},
+      {"component": "rate.jsx entry without groupId", "issue": "Opening /rate directly (no groupId param) calls ratingsApi.pending(undefined) → sends 'groupId=undefined' → backend 500. Frontend should either navigate to a group picker, guard the fetch when !groupId, or default to the latest completed group.", "testID": "rate-screen", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Notifications", "issues": ["All notification-type icons use the same teal circular background (bg-primary-light). Consider tint variance per type (or at least maize tint for reminder types) so the yellow dot isn't the only distinguishing cue."]},
+      {"screen": "Group Chat pinned card", "issues": ["'Save ~50% · Book Now' also shows on non-booker view — the click handler still calls /fare-split; consider hiding/relabeling Book Now for non-bookers or gating on isCurrentUserBooker (currently taps just route to fare-split)."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ridepact_phase3.py",
+    "/app/test_reports/pytest/phase3_results.xml"
+  ],
+  "action_items": [
+    "Backend (minor): In /api/ratings/pending and other endpoints that accept an ObjectId query param, validate with mongoose.Types.ObjectId.isValid(groupId) and return 400 instead of allowing the Mongoose CastError to bubble as 500.",
+    "Frontend (minor): calendar.jsx demand line — pluralize: `${count === 1 ? 'student' : 'students'} looking`.",
+    "Frontend (medium): rate.jsx — when useLocalSearchParams() returns no groupId, do NOT call ratingsApi.pending(); instead show a picker of the user's completed groups (or route from notifications/history where a groupId is guaranteed).",
+    "(Carried over) Replace RN inline shadow* style props with `boxShadow` in TabBar.jsx and profile.jsx to silence RN-web deprecation warning."
+  ],
+  "critical_code_review_comments": [
+    "sockets/chat.js does not validate group membership on 'chat:join' — any authenticated socket can join `group:<any-groupId>` room and receive that group's real-time chat:message events. Persistence is safely gated (GroupMember check in 'chat:send' and REST), but broadcast eavesdropping is possible. Add a membership check inside the 'chat:join' handler.",
+    "reliabilityService.recomputeReliability recomputes over ALL of a user's ratings on every submit, but ratings are not scoped to completed rides only. If a group is later cancelled, its ratings still contribute. Consider filtering by group.status === 'completed' or storing an isFinal flag.",
+    "calendar.js withDemand runs one countDocuments per event in Promise.all — fine for small pages but consider a $lookup / single aggregation for larger event lists.",
+    "notifications route lacks a /unread-count cap — fine today; if abuse becomes an issue, add rate limiting like /api/auth already has."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ridepact_phase3.py"
+  ],
+  "success_rate": {"backend": "100% (20/20 Phase 3; 63/63 overall across phases 0+2+3)", "frontend": "100% on Home, Notifications, Chat tab, Group Chat, Calendar and Rate screens (390x844 mobile viewport)"},
+  "seed_data_creation": "Each run registers fresh students qa3_<rand>@university.edu and qa3c_<rand>@university.edu (verified via devVerificationCode), a fresh public group A+B at DTW +12d, and a TEST_Event_<rand> travel event that is soft-deleted at the end. No teardown for users/groups (dev DB).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Phase 3 pytest requires serial execution (module-scoped state fixture): `pytest /app/backend/tests/test_ridepact_phase3.py -o addopts='-n 0'`. Socket.IO endpoint: `io(BASE_URL, {path:'/api/socket.io', auth:{token}, transports:['polling']})` — the ingress does NOT upgrade websockets, but polling works end-to-end. Membership rule: chat REST 403s non-members; 'chat:join' socket handler does NOT (see critical_code_review_comments). TravelEvent.type enum is {holiday, peak, exam, other} — NOT 'break'. Ratings duplicate returns 409 with error 'You already rated this rider'. reliabilityScore is round(avg((reliability+punctuality)/2), 1).",
+  "rca_of_issue": "N/A — all reviewed features work. Only two minor polish items and one backend defensive-validation gap surfaced."
+}

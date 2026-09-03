@@ -64,7 +64,7 @@ export default function RideHistory() {
       setSummary(res.summary || { completedRides: 0, totalSaved: 0 });
       setItems((prev) => (replace ? res.data : [...prev, ...res.data]));
       setPage(p);
-    } catch (e) {
+    } catch {
       // empty state
     } finally {
       setLoading(false);

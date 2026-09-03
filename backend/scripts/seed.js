@@ -51,6 +51,24 @@ const { ROLES } = require('../src/config/constants');
   }
   console.log(`[seed] destinations ensured: ${destinations.length}`);
 
+  // Reference travel events (break calendar).
+  const { TravelEvent } = require('../src/models');
+  const yr = new Date().getFullYear();
+  const events = [
+    { title: 'Fall Study Break', description: 'Long weekend before finals prep.', startDate: new Date(`${yr}-10-12`), endDate: new Date(`${yr}-10-15`), type: 'holiday' },
+    { title: 'Thanksgiving Recess', description: 'Campus closes for the holiday.', startDate: new Date(`${yr}-11-25`), endDate: new Date(`${yr}-11-29`), type: 'peak' },
+    { title: 'Winter Break', description: 'End-of-term travel period.', startDate: new Date(`${yr}-12-18`), endDate: new Date(`${yr + 1}-01-05`), type: 'peak' },
+  ];
+  for (const e of events) {
+    const { title, ...rest } = e;
+    await TravelEvent.updateOne(
+      { title },
+      { $set: { ...rest, visible: true }, $setOnInsert: { title } },
+      { upsert: true }
+    );
+  }
+  console.log(`[seed] travel events ensured: ${events.length}`);
+
   // Admin account. $setOnInsert avoids overwriting an existing admin's password.
   const email = env.ADMIN_EMAIL;
   const passwordHash = await bcrypt.hash(env.ADMIN_PASSWORD, 10);

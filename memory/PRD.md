@@ -79,6 +79,25 @@ multi-language, external CRM.
   paid/pending, complete), Ride History (summary + paginated cards, cancelled red border).
 - Verified: 43/43 backend tests + all 5 mobile screens.
 
+## Implemented (2026-09-03) — Phase 3: Communication, Ratings & Calendar (backend + mobile)
+- Socket.IO at path `/api/socket.io` with JWT handshake auth; per-RideGroup chat rooms
+  (membership-gated join) + per-user notification rooms; real-time delivery (polling transport
+  through the ingress proxy; websocket upgrade blocked by ingress — expected).
+- Chat: paginated history (newest-first, load-more on scroll-up), POST message, auto system
+  messages on join/leave/book/complete; chatService persists + broadcasts + notifies members.
+- Notifications: 11 types, paginated list with unread count, /unread-count, /:id/read, /read-all.
+- Ratings: reliabilityStars + punctualityStars + confirmed/flaked, unique per (group,rater,ratee),
+  ObjectId-validated; reliabilityService recomputes rolling reliabilityScore on submit.
+- TravelEvent: paginated calendar with live demandCount (rides in the event date range) +
+  highDemand flag; admin CRUD (admin-only, soft delete).
+- Mobile (NativeWind, lucide icons, no emoji, safe-area, paginated): Group Chat (pinned info +
+  countdown + gated Book Now, system messages, paginated), Notifications (per-type icons + status
+  dots, mark-all-read), Rate Riders (dual star rows + confirmed/flaked, anonymous), Travel Calendar
+  (date-badge cards, live demand, coral high-demand, Post-a-Ride CTA), Home (upcoming ride card,
+  break preview with demand, bell + unread badge, rich empty state), Chat tab (group list).
+- SocketContext reuses the single socket client + auth token; exposes unread count.
+- Verified: 63/63 backend tests + all Phase 3 screens.
+
 ## Backlog (next phases per SOW)
 ### Phase 1 (finish Foundation)
 - P1: Profile edit screen (mobile) wired to PATCH /users/me; admin university/domain CRUD UI.
