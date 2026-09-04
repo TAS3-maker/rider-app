@@ -62,8 +62,14 @@ async function recomputeGroup(groupId) {
   group.totalBags = totalBags;
   group.flightWindowStart = times.earliestFlight;
   group.flightWindowEnd = times.latestFlight;
-  group.suggestedDeparture = times.suggestedDeparture;
-  group.bookingDeadline = times.bookingDeadline;
+  if (group.destinationType === 'custom') {
+    // Custom destination → manual times, no auto-calculation. The entered flightTime IS the departure.
+    group.suggestedDeparture = times.earliestFlight;
+    group.bookingDeadline = undefined;
+  } else {
+    group.suggestedDeparture = times.suggestedDeparture;
+    group.bookingDeadline = times.bookingDeadline;
+  }
   group.vehicleCapacity = veh.capacity;
   group.vehicleSuggestion = veh.name;
 
@@ -105,6 +111,8 @@ async function createGroupFromRide(ride, { isPrivate = false, actorId } = {}) {
     direction: ride.direction,
     airport: ride.airport,
     destination: ride.destination,
+    destinationType: ride.destinationType || 'airport',
+    customDestinationName: ride.customDestinationName || '',
     travelDate: ride.travelDate,
     type: isPrivate ? GROUP_TYPE.PRIVATE : GROUP_TYPE.PUBLIC,
     inviteCode: isPrivate ? crypto.randomBytes(5).toString('hex') : undefined,
@@ -439,7 +447,7 @@ async function serializeGroup(groupId, currentUserId) {
   if (!group) return null;
   const members = await GroupMember.find({ group: groupId, isActive: true })
     .populate('user', 'name profileImage reliabilityScore pickupPreferences')
-    .populate('ride', 'flightTime checkedBags pickupLocation flightInfo passengerCount')
+    .populate('ride', 'flightTime checkedBags pickupLocation flightInfo passengerCount terminal')
     .lean();
   const fare = await FareRecord.findOne({ group: groupId }).lean();
 
@@ -455,9 +463,11 @@ async function serializeGroup(groupId, currentUserId) {
       userId: u._id,
       name: u.name || 'Rider',
       initials: initials(u.name),
+      profileImage: u.profileImage || '',
       reliabilityScore: u.reliabilityScore ?? null,
       flightTime: m.ride && m.ride.flightTime,
       checkedBags: (m.ride && m.ride.checkedBags) || 0,
+      terminal: (m.ride && m.ride.terminal) || undefined,
       isBooker: String(group.bookerId) === String(u._id),
       paymentConfirmed: shareRec ? shareRec.paymentConfirmed : m.paymentConfirmed || false,
       share: shareRec ? shareRec.amount : null,
@@ -471,6 +481,8 @@ async function serializeGroup(groupId, currentUserId) {
     university: group.university,
     direction: group.direction,
     airport: group.airport ? { id: group.airport._id, code: group.airport.code, name: group.airport.name } : null,
+    destinationType: group.destinationType || 'airport',
+    customDestinationName: group.customDestinationName || '',
     type: group.type,
     inviteCode: group.type === GROUP_TYPE.PRIVATE ? group.inviteCode : undefined,
     status: group.status,

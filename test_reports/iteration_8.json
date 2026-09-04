@@ -1,0 +1,37 @@
+{
+  "summary": "Backend-only verification of the additive Phase-5 changes for the 5 redesigned mobile screens on RidePact (Node/Express on 127.0.0.1:8500 via FastAPI proxy on :8001, public base https://typography-74.preview.emergentagent.com/api). Wrote /app/backend/tests/test_ridepact_phase5_new_fields.py (14 tests across 6 classes) and executed via pytest with JUnit output. All 14/14 tests PASS after restarting node-backend (the running Node process was serving pre-patch code — a `sudo supervisorctl restart node-backend` was required to pick up the additive changes; see rca_of_issue). Coverage: (1) POST /api/auth/login for seeded student@university.edu succeeds and returns accessToken + user. (2) POST /api/rides with direction=airport_to_university, terminal='north', flexibleTiming=true persists — GET /api/rides/:id returns flexibleTiming:true and terminal:'north'. (3) POST /api/rides with destinationType='custom', customDestinationName='Chicago', NO airport, direction=university_to_airport, mode=private → 201 and returned group has destinationType='custom', customDestinationName='Chicago', suggestedDeparture===flightTime (manual, no -165min buffer), bookingDeadline is null/undefined; confirmed again via GET /api/groups/:id. (4) POST /api/rides with destinationType='airport', valid ATL airport, mode=private → group.suggestedDeparture < flightTime (auto-calc applied) and bookingDeadline present and < suggestedDeparture. (5) GET /api/groups filters verified individually and combined: direction (all returned groups match), date (YYYY-MM-DD travelDate window), timeWindow (morning/afternoon/evening all return 200), minBags/maxBags (totalBags stays in range; 999-1000 returns empty), and page/limit/total/totalPages pagination all sane. (6) serializeGroup exposes top-level destinationType and customDestinationName plus per-member profileImage (string), flightTime, checkedBags, and reliabilityScore. No backend issues found. Frontend testing was explicitly out of scope per the review request.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ridepact_phase5_new_fields.py",
+    "/app/test_reports/pytest/phase5_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "rideController.createRide correctly gates airport-requirement on isCustom (b.destinationType==='custom') and only stores terminal for direction=airport_to_university — matches spec.",
+    "groupService.recomputeGroup branches on group.destinationType==='custom' to skip the DEPARTURE_BUFFER_MINUTES / BOOKING_BUFFER_MINUTES auto-calc and sets bookingDeadline=undefined; suggestedDeparture equals earliestFlight (i.e. the user-entered flightTime for a single-member private group) — verified end-to-end.",
+    "groupController.browse honors direction, airport, date (UTC-day window), minBags/maxBags (via aggregated totalBags), and timeWindow (accepts morning|afternoon|evening or explicit 'HH-HH'). Note: timeWindow uses local server hours (t.getHours()) whereas flightWindowStart is stored in UTC — this is only a latent concern if the container timezone differs from users; consider standardizing on UTC or accepting a tz offset param. All PASS on current server (UTC).",
+    "serializeGroup now exposes destinationType + customDestinationName at top level and member.profileImage / reliabilityScore / flightTime / checkedBags / terminal as required for the redesigned Group Details and Browse cards.",
+    "No 500 errors observed across 20+ endpoint invocations during the run."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ridepact_phase5_new_fields.py (created)"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 tests)",
+    "frontend": "not tested (out of scope per review_request.testing_type = 'backend only')"
+  },
+  "seed_data_creation": "Test suite creates a handful of TEST rides/groups (2 public rides via student1/student2 for filter coverage, plus 3 private groups for detail-level assertions). Data is not deleted between runs; each run adds fresh future-dated rides (+10..+30 days) so filters remain deterministic.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Base URL: https://typography-74.preview.emergentagent.com/api. Seeded students: student@university.edu / Student@12345 (Alex Rivera), taylor@university.edu / Student@12345 (Taylor Kim) — both pre-verified at State University. Airports available via GET /api/airports: ATL, DTW, JFK, LAX, ORD. Two Node processes are supervisor-managed: `backend` = FastAPI proxy on :8001, `node-backend` = Node/Express on :8500 — after any change to /app/backend/src/**, ALWAYS run `sudo supervisorctl restart node-backend` (uptime was 2h55m going into this run and was still serving stale code). Public POST /api/rides returns candidate lightGroup views (no destinationType field); the full serializeGroup shape is only returned by POST /api/rides mode=private and GET /api/groups/:id. Custom destinations must be created with mode=private (public candidate matching requires an airport). Regression test file: /app/backend/tests/test_ridepact_phase5_new_fields.py.",
+  "rca_of_issue": "On first run 6/14 tests failed — flexibleTiming missing from GET /api/rides/:id, POST /api/rides with destinationType='custom' returning 400 'airport is required', destinationType missing from group serializer, and minBags/maxBags filter being ignored. Root cause: the `node-backend` supervisor process had uptime 2h54m and was running a pre-Phase-5 build of /app/backend/src (schema without flexibleTiming/terminal/destinationType, controller without isCustom branch, browse without bag/timeWindow filters, serializer without new fields). Node/Express is not auto-reload under supervisor. Mitigation: `sudo supervisorctl restart node-backend`. After restart all 14 tests pass. Recommend either enabling nodemon-style watch for the node-backend supervisor entry, or documenting the restart step in the deploy/patch flow so subsequent iterations don't hit this."
+}

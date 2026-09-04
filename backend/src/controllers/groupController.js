@@ -27,6 +27,36 @@ async function browse(req, res, next) {
       e.setUTCDate(e.getUTCDate() + 1);
       filter.travelDate = { $gte: d, $lt: e };
     }
+    // Bag-count filter (group's aggregated totalBags).
+    const minBags = req.query.minBags != null ? parseInt(req.query.minBags, 10) : null;
+    const maxBags = req.query.maxBags != null ? parseInt(req.query.maxBags, 10) : null;
+    if (minBags != null || maxBags != null) {
+      filter.totalBags = {};
+      if (minBags != null) filter.totalBags.$gte = minBags;
+      if (maxBags != null) filter.totalBags.$lte = maxBags;
+    }
+    // Flight-time window filter — matches groups whose flight window overlaps the requested hours.
+    // timeWindow accepts "morning" | "afternoon" | "evening" or an explicit "HH-HH" (24h) range.
+    const WINDOWS = { morning: [5, 12], afternoon: [12, 17], evening: [17, 24] };
+    if (req.query.timeWindow) {
+      let range = WINDOWS[req.query.timeWindow];
+      if (!range && /^\d{1,2}-\d{1,2}$/.test(req.query.timeWindow)) {
+        range = req.query.timeWindow.split('-').map((n) => parseInt(n, 10));
+      }
+      if (range) {
+        const [startH, endH] = range;
+        const groups0 = await RideGroup.find(filter).select('flightWindowStart flightWindowEnd').lean();
+        const okIds = groups0
+          .filter((g) => {
+            const t = g.flightWindowStart ? new Date(g.flightWindowStart) : null;
+            if (!t) return false;
+            const h = t.getHours() + t.getMinutes() / 60;
+            return h >= startH && h < endH;
+          })
+          .map((g) => g._id);
+        filter._id = { $in: okIds };
+      }
+    }
     const [groups, total] = await Promise.all([
       RideGroup.find(filter).sort({ travelDate: 1, createdAt: -1 }).skip(skip).limit(limit).lean(),
       RideGroup.countDocuments(filter),

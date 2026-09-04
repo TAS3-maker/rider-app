@@ -153,6 +153,21 @@ multi-language, external CRM.
 ### Phase 4 — Testing & Launch (P1)
 - Full QA, edge cases, production config, store submission support.
 
+## Rovo pixel-perfect redesign — Part 2 (DONE, verified)
+- Screens rebuilt to match mockups: Create Ride (Path A UMich→DTW), Create Ride (Path B DTW→UMich
+  with DTW Terminal selector), Private Group (Invite Friends: DTW vs Custom Destination),
+  Browse Rides / Find Rides (filter bar + multi-rider cards + full/grayed state), Group Details.
+- Additive backend (verified 14/14 by testing agent):
+  - Ride: flexibleTiming, terminal (mcnamara|north), destinationType (airport|custom), customDestinationName
+  - RideGroup: destinationType, customDestinationName
+  - constants: TERMINAL, DESTINATION_TYPE enums
+  - rideController.createRide accepts new fields; airport optional when custom
+  - groupService.recomputeGroup skips auto-calc for custom (manual departure, no bookingDeadline);
+    serializeGroup exposes new fields + member profileImage
+  - groupController.browse: server-side timeWindow + minBags/maxBags filters (+ existing direction/date, pagination)
+- NOTE: backend supervisor process is `node-backend` (must restart after backend edits — no auto-reload).
+- Frontend-only elsewhere; admin-web, matching rules, lifecycle untouched.
+
 ## Rovo pixel-perfect redesign — Part 1 (DONE, verified via screenshots)
 - Welcome, Sign In, Sign Up, Home (active-ride card + empty state) rewritten element-by-element
   to match the 5 Rovo mockups: navy/cream/amber palette, uppercase field labels, white

@@ -5,6 +5,7 @@ const {
   GROUP_TYPE,
   PICKUP_MODE,
   DEFAULTS,
+  DESTINATION_TYPE,
 } = require('../config/constants');
 
 const rideGroupSchema = new mongoose.Schema(
@@ -13,6 +14,10 @@ const rideGroupSchema = new mongoose.Schema(
     direction: { type: String, enum: Object.values(RIDE_DIRECTION), required: true, index: true },
     airport: { type: mongoose.Schema.Types.ObjectId, ref: 'Airport', index: true },
     destination: { type: mongoose.Schema.Types.ObjectId, ref: 'Destination' },
+
+    // Airport (auto-computed times) vs custom destination (manual departure, no auto-calc).
+    destinationType: { type: String, enum: Object.values(DESTINATION_TYPE), default: DESTINATION_TYPE.AIRPORT },
+    customDestinationName: { type: String, default: '' },
 
     travelDate: { type: Date, required: true, index: true },
     flightWindowStart: { type: Date },

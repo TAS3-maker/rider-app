@@ -1,5 +1,5 @@
 const { mongoose } = require('../config/db');
-const { RIDE_DIRECTION, RIDE_STATUS } = require('../config/constants');
+const { RIDE_DIRECTION, RIDE_STATUS, DESTINATION_TYPE, TERMINAL } = require('../config/constants');
 
 const rideSchema = new mongoose.Schema(
   {
@@ -8,6 +8,12 @@ const rideSchema = new mongoose.Schema(
     direction: { type: String, enum: Object.values(RIDE_DIRECTION), required: true, index: true },
     airport: { type: mongoose.Schema.Types.ObjectId, ref: 'Airport', index: true },
     destination: { type: mongoose.Schema.Types.ObjectId, ref: 'Destination' },
+
+    // Airport (smart, auto-computed times) vs a free-text custom destination (manual times).
+    destinationType: { type: String, enum: Object.values(DESTINATION_TYPE), default: DESTINATION_TYPE.AIRPORT },
+    customDestinationName: { type: String, default: '' },
+    // DTW terminal — only relevant for airport_to_university. Stored + displayed, not matched on.
+    terminal: { type: String, enum: Object.values(TERMINAL), default: undefined },
 
     travelDate: { type: Date, required: true, index: true },
     // Primary scheduling input — the flight departure (or arrival) time.
@@ -20,6 +26,8 @@ const rideSchema = new mongoose.Schema(
     checkedBags: { type: Number, default: 0, min: 0 },
     luggageInfo: { type: String, default: '' },
     flexible: { type: Boolean, default: false },
+    // "I'm flexible on timing" toggle from the create-ride form.
+    flexibleTiming: { type: Boolean, default: false },
     notes: { type: String, default: '' },
 
     status: { type: String, enum: Object.values(RIDE_STATUS), default: RIDE_STATUS.OPEN, index: true },

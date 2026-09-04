@@ -30,6 +30,10 @@ module.exports = {
 
   MEMBER_ROLE: { MEMBER: 'member', BOOKER: 'booker' },
 
+  DESTINATION_TYPE: { AIRPORT: 'airport', CUSTOM: 'custom' },
+
+  TERMINAL: { MCNAMARA: 'mcnamara', NORTH: 'north' },
+
   MESSAGE_TYPE: { TEXT: 'text', SYSTEM: 'system' },
 
   TRAVEL_EVENT_TYPE: { HOLIDAY: 'holiday', PEAK: 'peak', EXAM: 'exam', OTHER: 'other' },

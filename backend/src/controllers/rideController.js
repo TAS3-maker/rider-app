@@ -44,7 +44,8 @@ async function createRide(req, res, next) {
     const b = req.body || {};
     if (!b.direction || !Object.values(RIDE_DIRECTION).includes(b.direction))
       return res.status(400).json({ error: 'Valid direction is required' });
-    if (!b.airport) return res.status(400).json({ error: 'airport is required' });
+    const isCustom = b.destinationType === 'custom';
+    if (!isCustom && !b.airport) return res.status(400).json({ error: 'airport is required' });
     if (!b.travelDate) return res.status(400).json({ error: 'travelDate is required' });
     if (!b.flightTime) return res.status(400).json({ error: 'flightTime is required' });
 
@@ -52,8 +53,11 @@ async function createRide(req, res, next) {
       student: req.user._id,
       university: req.user.university,
       direction: b.direction,
-      airport: b.airport,
+      airport: isCustom ? undefined : b.airport,
       destination: b.destination || undefined,
+      destinationType: isCustom ? 'custom' : 'airport',
+      customDestinationName: isCustom ? (b.customDestinationName || '') : '',
+      terminal: b.direction === RIDE_DIRECTION.AIRPORT_TO_UNIVERSITY && b.terminal ? b.terminal : undefined,
       travelDate: new Date(b.travelDate),
       flightTime: new Date(b.flightTime),
       flightInfo: b.flightInfo || '',
@@ -62,6 +66,7 @@ async function createRide(req, res, next) {
       checkedBags: b.checkedBags != null ? b.checkedBags : 0,
       luggageInfo: b.luggageInfo || '',
       flexible: !!b.flexible,
+      flexibleTiming: !!(b.flexibleTiming ?? b.flexible),
       notes: b.notes || '',
       status: RIDE_STATUS.OPEN,
     });

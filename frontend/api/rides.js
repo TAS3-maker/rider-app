@@ -15,6 +15,9 @@ export const groupsApi = {
     if (params.direction) q.set('direction', params.direction);
     if (params.airport) q.set('airport', params.airport);
     if (params.date) q.set('date', params.date);
+    if (params.timeWindow) q.set('timeWindow', params.timeWindow);
+    if (params.minBags != null) q.set('minBags', params.minBags);
+    if (params.maxBags != null) q.set('maxBags', params.maxBags);
     return apiFetch(`/groups?${q.toString()}`);
   },
   get: (id) => apiFetch(`/groups/${id}`),
