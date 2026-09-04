@@ -3,15 +3,38 @@ import {
   View,
   Text,
   Pressable,
+  TextInput,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Input from '@/components/Input';
-import Button from '@/components/Button';
 import { useAuth } from '@/context/AuthContext';
+
+const CARD_SHADOW = {
+  shadowColor: '#2C3A4B',
+  shadowOpacity: 0.06,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 2,
+};
+
+function Field({ label, ...props }) {
+  return (
+    <View className="mb-5">
+      <Text style={{ fontSize: 13, fontWeight: '700', color: '#1E2A38', letterSpacing: 0.4, marginBottom: 8 }}>
+        {label}
+      </Text>
+      <TextInput
+        placeholderTextColor="#A9B0B8"
+        className="w-full px-4 rounded-[14px] bg-white"
+        style={[{ paddingVertical: 16, fontSize: 16, color: '#1E2A38' }, CARD_SHADOW]}
+        {...props}
+      />
+    </View>
+  );
+}
 
 export default function SignUp() {
   const insets = useSafeAreaInsets();
@@ -57,45 +80,40 @@ export default function SignUp() {
   return (
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
-          <View className="px-5 pt-6 pb-6">
-            <Text className="text-[26px] font-extrabold text-text mb-1">Create account</Text>
-            <Text className="text-sm text-text-3">Only verified university emails accepted</Text>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 24 }}>
+          <View style={{ paddingTop: 40, marginBottom: 24 }}>
+            <Text style={{ fontSize: 34, lineHeight: 40, fontWeight: '800', color: '#1E2A38', letterSpacing: -0.5 }}>Create Account</Text>
+            <Text style={{ fontSize: 16, color: '#6B7480', marginTop: 8 }}>Only verified .edu emails accepted</Text>
           </View>
 
-          <Input label="Username" value={form.username} onChangeText={set('username')} placeholder="jdoe" testID="signup-username" />
-          <Input
-            label="University Email"
-            value={form.email}
-            onChangeText={set('email')}
-            placeholder="you@university.edu"
-            keyboardType="email-address"
-            testID="signup-email"
-          />
-          <Input label="Password" value={form.password} onChangeText={set('password')} placeholder="••••••••" secureTextEntry testID="signup-password" />
-          <Input label="Venmo or Zelle handle" value={form.paymentHandle} onChangeText={set('paymentHandle')} placeholder="@yourhandle" testID="signup-payment" />
-          <Input label="Pickup Address (private)" value={form.pickupAddress} onChangeText={set('pickupAddress')} placeholder="123 State St, Ann Arbor" autoCapitalize="words" testID="signup-pickup" />
+          <Field label="USERNAME" value={form.username} onChangeText={set('username')} placeholder="JDoe" autoCapitalize="none" testID="signup-username" />
+          <Field label="UNIVERSITY EMAIL" value={form.email} onChangeText={set('email')} placeholder="You@umich.edu" keyboardType="email-address" autoCapitalize="none" testID="signup-email" />
+          <Field label="PASSWORD" value={form.password} onChangeText={set('password')} placeholder="••••••••••" secureTextEntry testID="signup-password" />
+          <Field label="VENMO OR ZELLE HANDLE" value={form.paymentHandle} onChangeText={set('paymentHandle')} placeholder="@yourhandle" autoCapitalize="none" testID="signup-payment" />
+          <Field label="PICKUP ADDRESS (PRIVATE)" value={form.pickupAddress} onChangeText={set('pickupAddress')} placeholder="123 State st, Ann Arbor" autoCapitalize="words" testID="signup-pickup" />
 
           {error ? (
-            <Text testID="signup-error" className="px-5 mb-3 text-sm text-accent">
+            <Text testID="signup-error" style={{ textAlign: 'center', marginBottom: 8, fontSize: 14, color: '#C0392B' }}>
               {error}
             </Text>
           ) : null}
 
-          <View className="px-5 mt-2">
-            <Button title="Create Account" onPress={onSubmit} loading={loading} testID="signup-submit" />
-          </View>
+          <Pressable
+            testID="signup-submit"
+            onPress={onSubmit}
+            disabled={loading}
+            className="rounded-[14px] items-center justify-center"
+            style={[
+              { backgroundColor: '#2C3A4B', paddingVertical: 18, marginTop: 8, marginHorizontal: 24, opacity: loading ? 0.7 : 1 },
+              { shadowColor: '#2C3A4B', shadowOpacity: 0.25, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 5 },
+            ]}
+          >
+            <Text style={{ fontSize: 17, fontWeight: '700', color: '#FFFFFF' }}>{loading ? 'Creating…' : 'Create Account'}</Text>
+          </Pressable>
 
-          <Text className="text-center mt-3 text-[11px] text-text-3 px-10 leading-5">
-            By signing up, you agree to our Terms of Service and Privacy Policy
+          <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 12, lineHeight: 18, color: '#A0A8B0' }}>
+            By signing up, you agree to our{'\n'}Terms of Service and Privacy Policy
           </Text>
-
-          <View className="flex-row justify-center mt-4">
-            <Text className="text-[13px] text-text-3">Already have an account? </Text>
-            <Pressable testID="signup-goto-signin" onPress={() => router.replace('/(auth)/signin')}>
-              <Text className="text-[13px] font-semibold text-primary">Sign In</Text>
-            </Pressable>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

@@ -2,12 +2,67 @@ import { useCallback, useState } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Bell, Plane, TrendingDown, Users, ChevronRight, Plus } from 'lucide-react-native';
+import { Bell, Users } from 'lucide-react-native';
 import { ridesApi } from '@/api/rides';
 import { calendarApi } from '@/api/social';
 import { useSocket } from '@/context/SocketContext';
-import { formatDate, shortDate } from '@/lib/format';
-import StatusTag from '@/components/StatusTag';
+import { shortDate, formatTime } from '@/lib/format';
+import RovoCar from '@/components/RovoCar';
+import RovoCloud from '@/components/RovoCloud';
+
+const INK = '#1E2A38';
+const LABEL = '#8A94A0';
+const SUB = '#6B7480';
+const GREEN = '#3E9E75';
+const AMBER = '#E0913C';
+
+const CARD_SHADOW = {
+  shadowColor: '#2C3A4B',
+  shadowOpacity: 0.07,
+  shadowRadius: 14,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 2,
+};
+
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+function ampm(value) {
+  return formatTime(value).replace(' ', '').toLowerCase();
+}
+
+function DateBadge({ value }) {
+  const d = value ? new Date(value) : new Date();
+  return (
+    <View style={{ width: 54, height: 58, borderRadius: 14, backgroundColor: '#EDF0F3', alignItems: 'center', justifyContent: 'center' }}>
+      <Text style={{ fontSize: 11, fontWeight: '700', color: SUB, letterSpacing: 0.5 }}>{MONTHS[d.getMonth()]}</Text>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: INK, lineHeight: 26 }}>{d.getDate()}</Text>
+    </View>
+  );
+}
+
+function TravelCard({ ev, onPress }) {
+  return (
+    <Pressable
+      testID={`home-break-${ev.id}`}
+      onPress={onPress}
+      className="rounded-[16px] bg-white p-4 flex-row items-center"
+      style={[{ marginHorizontal: 24, marginBottom: 14 }, CARD_SHADOW, ev.highDemand ? { borderWidth: 1.5, borderColor: '#F0C48A' } : null]}
+    >
+      <DateBadge value={ev.startDate} />
+      <View style={{ flex: 1, marginLeft: 14 }}>
+        <Text style={{ fontSize: 16, fontWeight: '800', color: INK }}>{ev.title}</Text>
+        <Text style={{ fontSize: 13, color: SUB, marginTop: 2 }}>
+          {shortDate(ev.startDate)}{ev.endDate ? `–${shortDate(ev.endDate)}` : ''}{ev.subtitle ? ` · ${ev.subtitle}` : ''}
+        </Text>
+        <View className="flex-row items-center" style={{ marginTop: 6 }}>
+          <Users size={14} color={AMBER} />
+          <Text style={{ fontSize: 13, color: AMBER, fontWeight: '700', marginLeft: 5 }}>{ev.demandCount} students</Text>
+          <Text style={{ fontSize: 13, color: SUB }}> looking for rides</Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
 
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -33,80 +88,134 @@ export default function Home() {
     return () => { on = false; };
   }, []));
 
-  const nearest = events[0];
+  const renderRideCard = () => {
+    const airport = upcoming.airport || upcoming.airportCode || 'Airport';
+    const toAirport = upcoming.direction !== 'airport_to_university';
+    const title = toAirport ? `Campus → ${airport}` : `${airport} → Campus`;
+
+    const statusMap = { open: 'OPEN', nearly_full: 'NEARLY FULL', full: 'FULL', confirmed: 'BOOKED', in_progress: 'BOOKED', completed: 'COMPLETED', cancelled: 'CANCELLED' };
+    const statusText = statusMap[upcoming.status] || (upcoming.status || '').toUpperCase();
+    const count = upcoming.memberCount != null && upcoming.capacity != null ? ` · ${upcoming.memberCount}/${upcoming.capacity}` : '';
+    const warn = upcoming.status === 'nearly_full';
+    const danger = upcoming.status === 'full' || upcoming.status === 'cancelled';
+    const pillBg = danger ? '#FBE6E3' : warn ? '#FBEFDD' : '#E4F2EA';
+    const pillFg = danger ? '#C0392B' : warn ? AMBER : GREEN;
+
+    const rows = [];
+    if (upcoming.travelDate || upcoming.flightTime) {
+      rows.push({ label: 'Flight', value: `${shortDate(upcoming.travelDate)}${upcoming.flightTime ? ` · ${ampm(upcoming.flightTime)}` : ''}` });
+    }
+    if (upcoming.departTime) rows.push({ label: 'Depart Campus', value: `~${ampm(upcoming.departTime)}` });
+    if (upcoming.bookingDeadline) rows.push({ label: 'Book by', value: ampm(upcoming.bookingDeadline).toUpperCase(), accent: true });
+    if (upcoming.estPerPerson != null) rows.push({ label: 'Est. per person', value: `$${Number(upcoming.estPerPerson).toFixed(0)}` });
+
+    const pct = upcoming.savingsPercent;
+    const btnLabel = pct ? `Save ~${pct}% vs Riding Solo` : upcoming.saved != null ? `You saved $${upcoming.saved.toFixed(2)}` : 'View Ride Details';
+
+    return (
+      <>
+        <Text style={{ paddingHorizontal: 24, paddingTop: 6, paddingBottom: 12, fontSize: 13, fontWeight: '700', color: LABEL, letterSpacing: 0.8 }}>YOUR UPCOMING RIDE</Text>
+        <Pressable
+          testID="home-upcoming"
+          onPress={() => router.push({ pathname: '/group', params: { id: upcoming.id } })}
+          className="rounded-[20px] bg-white p-5"
+          style={[{ marginHorizontal: 24 }, CARD_SHADOW]}
+        >
+          <View className="flex-row items-center justify-between" style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: INK }}>{title}</Text>
+            <View className="flex-row items-center">
+              <View style={{ backgroundColor: pillBg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: pillFg }}>{statusText}{count}</Text>
+              </View>
+              <View style={{ marginLeft: 8 }}><Users size={18} color={GREEN} /></View>
+            </View>
+          </View>
+
+          {rows.map((r, i) => (
+            <View key={r.label} className="flex-row items-center justify-between" style={{ paddingVertical: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: '#F0ECE3' }}>
+              <Text style={{ fontSize: 15, color: SUB }}>{r.label}</Text>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: r.accent ? AMBER : INK }}>{r.value}</Text>
+            </View>
+          ))}
+
+          <Pressable
+            testID="home-save-cta"
+            onPress={() => router.push({ pathname: '/group', params: { id: upcoming.id } })}
+            className="rounded-[14px] items-center justify-center"
+            style={{ backgroundColor: '#2C3A4B', paddingVertical: 15, marginTop: 12 }}
+          >
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#fff' }}>{btnLabel}</Text>
+          </Pressable>
+        </Pressable>
+      </>
+    );
+  };
+
+  const renderEmpty = () => (
+    <View testID="home-empty">
+      <View className="items-center" style={{ paddingTop: 18, paddingBottom: 26 }}>
+        <RovoCar width={200} color="#2C3A4B" />
+        <Text style={{ fontSize: 15, fontWeight: '800', color: INK, letterSpacing: 1, marginTop: 4 }}>NO RIDES YET</Text>
+        <View style={{ marginTop: 22, marginBottom: 22 }}>
+          <RovoCloud width={92} color="#2C3A4B" />
+        </View>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: INK }}>Be the first!</Text>
+        <Text style={{ fontSize: 15, lineHeight: 22, color: SUB, textAlign: 'center', marginTop: 6, maxWidth: 290 }}>
+          Post your trip and we&rsquo;ll notify you when someone matches your flight time.
+        </Text>
+        <Pressable
+          testID="home-create-ride"
+          onPress={() => router.push('/(tabs)/create')}
+          className="rounded-[14px] items-center justify-center"
+          style={[
+            { backgroundColor: '#2C3A4B', paddingVertical: 16, marginTop: 24, alignSelf: 'stretch', marginHorizontal: 24 },
+            { shadowColor: '#2C3A4B', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
+          ]}
+        >
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>Create a Ride</Text>
+        </Pressable>
+      </View>
+      <View style={{ height: 1, backgroundColor: '#EAE5DB', marginHorizontal: 24, marginBottom: 8 }} />
+    </View>
+  );
 
   return (
     <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
-      <View className="flex-row items-center justify-between px-5 py-3">
-        <Text testID="home-title" className="text-[22px] font-extrabold text-text">Home</Text>
-        <Pressable testID="home-notifications" onPress={() => router.push('/notifications')} className="w-9 h-9 rounded-full bg-white items-center justify-center border border-border">
-          <Bell size={18} color="#1A1A2E" />
+      <View className="flex-row items-center justify-between" style={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 10 }}>
+        <Text testID="home-title" style={{ fontSize: 32, fontWeight: '800', color: INK, letterSpacing: -0.5 }}>Home</Text>
+        <Pressable testID="home-notifications" onPress={() => router.push('/notifications')} style={{ padding: 4 }}>
+          <Bell size={24} color={INK} />
           {unreadCount > 0 ? (
-            <View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-accent items-center justify-center" testID="home-unread-badge">
-              <Text className="text-[10px] font-bold text-white">{unreadCount > 9 ? '9+' : unreadCount}</Text>
-            </View>
+            <View style={{ position: 'absolute', top: 2, right: 2, width: 9, height: 9, borderRadius: 5, backgroundColor: '#E0483D' }} testID="home-unread-badge" />
           ) : null}
         </Pressable>
       </View>
 
       {loading ? (
-        <View className="flex-1 items-center justify-center"><ActivityIndicator color="#3AAFA9" size="large" /></View>
+        <View className="flex-1 items-center justify-center"><ActivityIndicator color="#2C3A4B" size="large" /></View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-          <Text className="px-5 pt-3 pb-2 text-[13px] font-bold text-text-3 uppercase tracking-wide">Your Upcoming Ride</Text>
-          {upcoming ? (
-            <Pressable testID="home-upcoming" onPress={() => router.push({ pathname: '/group', params: { id: upcoming.id } })} className="mx-5 rounded-[14px] bg-white p-4 border border-border">
-              <View className="flex-row items-center justify-between mb-2">
-                <Text className="text-[15px] font-bold text-text">{upcoming.direction === 'airport_to_university' ? 'Airport → Campus' : 'Campus → Airport'}</Text>
-                <StatusTag status={upcoming.status} />
-              </View>
-              <View className="flex-row justify-between py-0.5"><Text className="text-[13px] text-text-3">Date</Text><Text className="text-[13px] font-semibold text-text">{formatDate(upcoming.travelDate)}</Text></View>
-              {upcoming.saved != null ? (
-                <View className="flex-row items-center gap-1.5 mt-2 pt-2 border-t border-border">
-                  <TrendingDown size={15} color="#3AAFA9" />
-                  <Text className="text-[13px] font-semibold text-primary-dark">You saved ${upcoming.saved.toFixed(2)}</Text>
-                </View>
-              ) : null}
-            </Pressable>
-          ) : (
-            <View className="mx-5 rounded-[14px] bg-white p-6 border border-border items-center" testID="home-empty">
-              <View className="w-20 h-20 rounded-full bg-primary-light items-center justify-center mb-4"><Plane size={34} color="#3AAFA9" strokeWidth={1.5} /></View>
-              <Text className="text-lg font-bold text-text mb-1">No active ride</Text>
-              <Text className="text-sm text-text-3 text-center leading-5 mb-2 max-w-[260px]">Post your trip and we&rsquo;ll match you with students on your flight.</Text>
-              {nearest ? (
-                <View className="flex-row items-center gap-1.5 mb-4">
-                  <Users size={13} color="#FF6B6B" />
-                  <Text className="text-[12px] font-semibold text-accent">{nearest.demandCount} student{nearest.demandCount === 1 ? '' : 's'} looking for {nearest.title}</Text>
-                </View>
-              ) : null}
-              <Pressable testID="home-create-ride" onPress={() => router.push('/(tabs)/create')} className="bg-primary px-6 py-3 rounded-[12px] flex-row items-center gap-2">
-                <Plus size={16} color="#fff" /><Text className="text-white font-semibold text-sm">Create a Ride</Text>
-              </Pressable>
-              <Pressable testID="home-notify-me" onPress={() => router.push('/calendar')} className="mt-2 px-6 py-2">
-                <Text className="text-primary-dark font-semibold text-[13px]">Notify me about breaks</Text>
-              </Pressable>
-            </View>
-          )}
+        <ScrollView contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+          {upcoming ? renderRideCard() : renderEmpty()}
 
-          <View className="flex-row items-center justify-between px-5 pt-5 pb-2">
-            <Text className="text-[13px] font-bold text-text-3 uppercase tracking-wide">Upcoming Breaks</Text>
-            <Pressable testID="home-see-calendar" onPress={() => router.push('/calendar')} className="flex-row items-center">
-              <Text className="text-[12px] font-semibold text-primary-dark">See all</Text>
-              <ChevronRight size={14} color="#2B8A85" />
-            </Pressable>
-          </View>
+          <Text style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 14, fontSize: 13, fontWeight: '700', color: LABEL, letterSpacing: 0.8 }}>UPCOMING TRAVEL</Text>
           {events.map((ev) => (
-            <Pressable key={ev.id} testID={`home-break-${ev.id}`} onPress={() => router.push('/calendar')} className="mx-5 mb-2 rounded-[14px] bg-white p-3.5 border border-border flex-row items-center justify-between" style={ev.highDemand ? { borderColor: '#FF6B6B', borderWidth: 1.5 } : undefined}>
-              <View>
-                <Text className="text-[14px] font-bold text-text">{ev.title}</Text>
-                <Text className="text-[12px] text-text-3 mt-0.5">{shortDate(ev.startDate)}{ev.endDate ? ` – ${shortDate(ev.endDate)}` : ''}</Text>
-              </View>
-              <View className="flex-row items-center gap-1">
-                <Users size={13} color={ev.highDemand ? '#FF6B6B' : '#3AAFA9'} />
-                <Text className={`text-[12px] font-bold ${ev.highDemand ? 'text-accent' : 'text-primary-dark'}`}>{ev.demandCount}</Text>
-              </View>
-            </Pressable>
+            <TravelCard key={ev.id} ev={ev} onPress={() => router.push('/calendar')} />
           ))}
+
+          {!upcoming ? (
+            <View className="items-center" style={{ marginTop: 6 }}>
+              <Pressable
+                testID="home-notify-me"
+                onPress={() => router.push('/calendar')}
+                className="flex-row items-center justify-center rounded-[14px] bg-white"
+                style={[{ paddingVertical: 16, alignSelf: 'stretch', marginHorizontal: 24 }, CARD_SHADOW]}
+              >
+                <Bell size={17} color={INK} />
+                <Text style={{ fontSize: 16, fontWeight: '700', color: INK, marginLeft: 8 }}>Notify Me</Text>
+              </Pressable>
+              <Text style={{ fontSize: 13, color: SUB, marginTop: 10 }}>when rides are posted</Text>
+            </View>
+          ) : null}
         </ScrollView>
       )}
     </View>

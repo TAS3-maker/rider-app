@@ -1,36 +1,59 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StatusBar } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Car, Cloud } from 'lucide-react-native';
+import RovoCar from '@/components/RovoCar';
+import RovoCloud from '@/components/RovoCloud';
 
 export default function Welcome() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
   return (
     <View className="flex-1 bg-navy" style={{ paddingTop: insets.top }}>
-      {/* cloud motif */}
-      <Cloud size={64} color="#3A4A5C" fill="#3A4A5C" style={{ position: 'absolute', top: insets.top + 40, right: 20 }} />
-      <Cloud size={90} color="#3A4A5C" fill="#3A4A5C" style={{ position: 'absolute', top: insets.top + 300, left: -10 }} />
+      <StatusBar barStyle="light-content" />
+
+      {/* decorative clouds */}
+      <View style={{ position: 'absolute', top: insets.top + 60, right: -10 }}>
+        <RovoCloud width={96} color="#3A4A5C" />
+      </View>
+      <View style={{ position: 'absolute', top: insets.top + 360, right: 12 }}>
+        <RovoCloud width={128} color="#47586A" />
+      </View>
+      <View style={{ position: 'absolute', top: insets.top + 430, left: -24 }}>
+        <RovoCloud width={210} color="#C7D0DA" />
+      </View>
 
       <View className="flex-1 px-7 justify-center">
-        <Car size={72} color="#FFFFFF" strokeWidth={1.5} />
-        <Text className="text-white font-extrabold" style={{ fontSize: 72, lineHeight: 78, marginTop: -6 }}>Rovo</Text>
-        <View className="mt-6">
-          <Text className="text-[18px] text-white/70">Same place. Same time.</Text>
-          <Text className="text-[18px] text-white/70">Find people going your way.</Text>
-          <Text className="text-[18px] font-bold text-white mt-1">Save up to 65%.</Text>
+        <RovoCar width={300} color="#FFFFFF" />
+        <Text className="text-white" style={{ fontSize: 92, lineHeight: 96, fontWeight: '800', letterSpacing: -2, marginTop: -8 }}>
+          Rovo
+        </Text>
+        <View style={{ marginTop: 28 }}>
+          <Text style={{ fontSize: 18, lineHeight: 26, color: '#9AA6B2' }}>Same place. Same time.</Text>
+          <Text style={{ fontSize: 18, lineHeight: 26, color: '#9AA6B2' }}>Find people going your way.</Text>
+          <Text style={{ fontSize: 18, lineHeight: 26, fontWeight: '700', color: '#FFFFFF', marginTop: 4 }}>Save up to 65%.</Text>
         </View>
       </View>
 
       <View className="px-7" style={{ paddingBottom: insets.bottom + 28 }}>
-        <View className="self-center px-5 py-2.5 mb-4 rounded-full border" style={{ borderColor: '#E0913C' }}>
-          <Text className="text-[14px] font-bold text-amber">Verified .edu Students Only</Text>
+        <View className="self-center px-5 py-2.5 mb-5 rounded-full border" style={{ borderColor: '#E0913C', borderWidth: 1.5 }}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: '#E0913C' }}>Verified .edu Students Only</Text>
         </View>
-        <Pressable testID="welcome-getstarted" onPress={() => router.push('/(auth)/signup')} className="bg-cream rounded-[14px] py-4 items-center mb-3">
-          <Text className="text-[16px] font-bold text-ink">Get Started</Text>
+        <Pressable
+          testID="welcome-getstarted"
+          onPress={() => router.push('/(auth)/signup')}
+          className="rounded-[14px] py-4 items-center mb-3.5"
+          style={{ backgroundColor: '#F4EFE6' }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#1E2A38' }}>Get Started</Text>
         </Pressable>
-        <Pressable testID="welcome-signin" onPress={() => router.push('/(auth)/signin')} className="bg-navy-light rounded-[14px] py-4 items-center">
-          <Text className="text-[16px] font-bold text-white">I already have an account</Text>
+        <Pressable
+          testID="welcome-signin"
+          onPress={() => router.push('/(auth)/signin')}
+          className="rounded-[14px] py-4 items-center"
+          style={{ backgroundColor: '#3A4A5C' }}
+        >
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF' }}>I already have an account</Text>
         </Pressable>
       </View>
     </View>

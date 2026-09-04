@@ -1,17 +1,19 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@react-native-vector-icons/ionicons';
 
 const ICONS = {
-  home: 'home',
-  find: 'search',
-  chat: 'chatbubble',
-  profile: 'person',
+  home: { on: 'home', off: 'home-outline' },
+  find: { on: 'search', off: 'search-outline' },
+  chat: { on: 'chatbubble', off: 'chatbubble-outline' },
+  profile: { on: 'person', off: 'person-outline' },
 };
-const LABELS = { home: 'Home', find: 'Find', chat: 'Chat', profile: 'Profile' };
 const ORDER = ['home', 'find', 'create', 'chat', 'profile'];
 
-// Custom bottom tab bar matching wireframe: 4 tabs + a raised circular "+" create button.
+const ACTIVE = '#2C3A4B';
+const INACTIVE = '#98A2AE';
+
+// Bottom tab bar matching the Rovo mockups: 4 icon-only tabs + a raised navy "+" FAB.
 export default function TabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
 
@@ -27,8 +29,13 @@ export default function TabBar({ state, navigation }) {
 
   return (
     <View
-      className="flex-row items-center justify-around bg-white border-t border-border px-2"
-      style={{ height: 64 + insets.bottom, paddingBottom: insets.bottom }}
+      className="flex-row items-center justify-around bg-white px-2"
+      style={{
+        height: 62 + insets.bottom,
+        paddingBottom: insets.bottom,
+        borderTopWidth: 1,
+        borderTopColor: '#EAE5DB',
+      }}
     >
       {ORDER.map((name) => {
         if (name === 'create') {
@@ -37,10 +44,21 @@ export default function TabBar({ state, navigation }) {
               key="create"
               testID="tab-create-button"
               onPress={() => go('create')}
-              className="w-12 h-12 rounded-full bg-primary items-center justify-center -mt-5"
-              style={{ boxShadow: '0px 4px 12px rgba(58,175,169,0.30)', elevation: 6 }}
+              className="items-center justify-center"
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: ACTIVE,
+                marginTop: -22,
+                shadowColor: '#2C3A4B',
+                shadowOpacity: 0.3,
+                shadowRadius: 10,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 6,
+              }}
             >
-              <Ionicons name="add" size={28} color="#fff" />
+              <Ionicons name="add" size={30} color="#fff" />
             </Pressable>
           );
         }
@@ -50,12 +68,10 @@ export default function TabBar({ state, navigation }) {
             key={name}
             testID={`tab-${name}`}
             onPress={() => go(name)}
-            className="items-center justify-center py-1.5 px-3"
+            className="items-center justify-center"
+            style={{ width: 56, height: 48 }}
           >
-            <Ionicons name={ICONS[name]} size={22} color={focused ? '#3AAFA9' : '#8A8A9A'} />
-            <Text className={`text-[10px] mt-0.5 ${focused ? 'text-primary' : 'text-text-3'}`}>
-              {LABELS[name]}
-            </Text>
+            <Ionicons name={focused ? ICONS[name].on : ICONS[name].off} size={25} color={focused ? ACTIVE : INACTIVE} />
           </Pressable>
         );
       })}

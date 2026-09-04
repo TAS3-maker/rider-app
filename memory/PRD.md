@@ -153,6 +153,16 @@ multi-language, external CRM.
 ### Phase 4 — Testing & Launch (P1)
 - Full QA, edge cases, production config, store submission support.
 
+## Rovo pixel-perfect redesign — Part 1 (DONE, verified via screenshots)
+- Welcome, Sign In, Sign Up, Home (active-ride card + empty state) rewritten element-by-element
+  to match the 5 Rovo mockups: navy/cream/amber palette, uppercase field labels, white
+  rounded inputs w/ soft shadow, navy pill buttons w/ shadow.
+- New reusable SVG marks: components/RovoCar.jsx (sleek car silhouette) and RovoCloud.jsx.
+- TabBar.jsx restyled to icon-only tabs + raised navy "+" FAB (matches mockup).
+- Home keeps real backend data (rides/history + calendar), only restyled.
+- Frontend-only; no backend/admin/schema changes.
+- Pending: Part 2-4 remaining screens await user uploads (Browse, Group, Chat, Fare, etc.).
+
 ## Next tasks
 1. Phase 2 ride creation + rule-based matching (highest value — core journey).
 2. Admin dashboard data wiring (replace remaining mock data with backend).
