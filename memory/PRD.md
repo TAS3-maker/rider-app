@@ -131,6 +131,15 @@ multi-language, external CRM.
   wireframe. Known deviation: admin sidebar uses the pre-existing emoji glyphs from the supplied
   admin codebase (left untouched per "do not redesign admin UI").
 
+## Rebrand — RidePact → Rovo (mobile, Part 1 of 4)
+- tailwind.config.js repointed to Rovo palette (navy #2C3A4B, cream #F4EFE6, amber #E0913C,
+  green #3E9E75) — legacy keys repointed so all screens adopt the rebrand; named tokens added.
+- app.json name → "Rovo"; splash background → navy.
+- Welcome screen redesigned (navy, car wordmark, tagline, amber .edu pill, cream/navy buttons).
+- Sign In / Sign Up / Home auto-adopt new palette (Sign Up already captures paymentHandle +
+  pickupAddress — both already on User model + register endpoint, no backend change).
+- Pending: fine-tune Sign In/Sign Up/Home/empty exact layouts as remaining batch screens arrive.
+
 ## Backlog (next phases per SOW)
 ### Phase 1 (finish Foundation)
 - P1: Profile edit screen (mobile) wired to PATCH /users/me; admin university/domain CRUD UI.

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "Rovo",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#2C3A4B"
       },
       "package": "com.emergent.typography.oq7wbi"
     },
@@ -31,7 +31,7 @@
           "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#2C3A4B"
         }
       ],
       "expo-font",

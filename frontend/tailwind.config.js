@@ -1,5 +1,6 @@
-/** RidePact design tokens — pulled from wireframes.html :root variables.
- *  Identical token set is used by admin-web's Tailwind config. */
+/** Rovo design tokens — sampled from the Rovo mobile mockups.
+ *  Core keys (bg/primary/accent/text/border) are repointed to the new palette so every
+ *  screen adopts the rebrand; navy/cream/amber/green/ink/muted are the named Rovo tokens. */
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
@@ -7,19 +8,25 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: '#F5F5F0',
+        // Rovo named tokens
+        navy: { DEFAULT: '#2C3A4B', dark: '#1E2A38', light: '#3A4A5C' },
+        cream: '#F4EFE6',
+        card: '#FFFFFF',
+        amber: { DEFAULT: '#E0913C', light: '#FBEFDD' },
+        green: { DEFAULT: '#3E9E75', light: '#E4F2EA' },
+        ink: '#1E2A38',
+        muted: '#8A94A0',
+        // Legacy keys repointed to the Rovo palette (keeps existing classNames on-brand)
+        bg: '#F4EFE6',
         white: '#FFFFFF',
-        primary: { DEFAULT: '#3AAFA9', light: '#E8F6F5', dark: '#2B8A85' },
-        accent: { DEFAULT: '#FF6B6B', light: '#FFF0F0' },
-        maize: { DEFAULT: '#F5C842', light: '#FFF8E1' },
-        text: { DEFAULT: '#1A1A2E', 2: '#4A4A5A', 3: '#8A8A9A' },
-        border: '#E8E8E8',
-        sidebar: '#1A1A2E',
+        primary: { DEFAULT: '#2C3A4B', light: '#E7EBEF', dark: '#1E2A38' },
+        accent: { DEFAULT: '#E0913C', light: '#FBEFDD' },
+        maize: { DEFAULT: '#E0913C', light: '#FBEFDD' },
+        text: { DEFAULT: '#1E2A38', 2: '#4A5763', 3: '#8A94A0' },
+        border: '#E7E2D8',
+        sidebar: '#1E2A38',
       },
-      borderRadius: {
-        card: '14px',
-        btn: '12px',
-      },
+      borderRadius: { card: '16px', btn: '14px' },
     },
   },
   plugins: [],
