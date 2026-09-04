@@ -153,6 +153,16 @@ multi-language, external CRM.
 ### Phase 4 — Testing & Launch (P1)
 - Full QA, edge cases, production config, store submission support.
 
+## Rovo pixel-perfect redesign — Part 4 (DONE, verified — FINAL batch)
+- UI-only (no backend changes) redesign of the last 4 screens, matched to mockups + screenshot-verified:
+  - Travel Calendar (calendar.jsx): big heading + "{uni} · {term}" subtitle, date-badge cards (navy normal / amber high-demand "— Very High demand"), pinned "Post a Ride for a Break" CTA.
+  - Ride History (ride-history.jsx): back + heading + "{n} completed · ${saved} saved total", cards w/ route, COMPLETED/CANCELLED pill, riders (Booker tag), fare/paid/saved(%)/payment(✓)/rating rows, red left-border for cancelled.
+  - Profile (profile.jsx): heading + gear, avatar initials, name, "{uni} · Class of ...", 3-stat row (Rating/Rides/Saved), icon rows (Email/Payment/Pickup area/Address muted/Ride History View→/Terms View→), red Sign Out →.
+  - Notifications (notifications.jsx): back + heading, dot (green unread / amber travel / gray read) + title + body + relative timestamp, no dividers.
+- Display guard: headline "Saved" totals clamped to ≥ 0 (test data can go negative). Per-card values stay truthful.
+- 'Your rating given' uses a 4.5 placeholder (no backing field) per the UI-only mock allowance.
+- All 19 Rovo screens are now redesigned. admin-web / matching / lifecycle untouched throughout.
+
 ## Rovo pixel-perfect redesign — Part 3 (DONE, verified)
 - UI-only (no backend changes) redesign of 5 screens, matched to mockups + E2E validated:
   - Rate Riders (rate.jsx): centered title, per-member card w/ avatar + BOOKER pill + RELIABILITY/PUNCTUALITY tap-to-select navy stars, Submit Ratings.
