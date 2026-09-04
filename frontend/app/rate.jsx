@@ -1,17 +1,24 @@
 import { useCallback, useState } from 'react';
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { Star, Check, X, ShieldCheck } from 'lucide-react-native';
+import { Star } from 'lucide-react-native';
 import { ratingsApi } from '@/api/social';
-import ScreenHeader from '@/components/ScreenHeader';
+import { groupsApi } from '@/api/rides';
+
+const INK = '#1E2A38';
+const SUB = '#8A94A0';
+const NAVY = '#2C3A4B';
+const EMPTY = '#D3D9DF';
+
+const CARD_SHADOW = { shadowColor: '#2C3A4B', shadowOpacity: 0.07, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 2 };
 
 function Stars({ value, onChange, testIDPrefix }) {
   return (
-    <View className="flex-row gap-1.5">
+    <View className="flex-row items-center justify-center" style={{ gap: 10 }}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Pressable key={n} testID={`${testIDPrefix}-${n}`} onPress={() => onChange(n)} hitSlop={6}>
-          <Star size={26} color="#F5C842" fill={n <= value ? '#F5C842' : 'transparent'} />
+          <Star size={34} color={n <= value ? NAVY : EMPTY} fill={n <= value ? NAVY : EMPTY} />
         </Pressable>
       ))}
     </View>
@@ -23,7 +30,7 @@ export default function Rate() {
   const router = useRouter();
   const { groupId } = useLocalSearchParams();
   const [members, setMembers] = useState([]);
-  const [form, setForm] = useState({}); // userId -> { reliability, punctuality, confirmed }
+  const [form, setForm] = useState({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -32,12 +39,22 @@ export default function Rate() {
     let on = true;
     if (!groupId) { setLoading(false); return () => { on = false; }; }
     ratingsApi.pending(groupId)
-      .then((r) => {
+      .then(async (r) => {
         if (!on) return;
-        const list = (r.data || []).filter((m) => !m.alreadyRated);
+        // Enrich with booker flag + avatar from the group (ratings/pending doesn't provide them).
+        let meta = {};
+        try {
+          const g = await groupsApi.get(groupId);
+          const bookerId = g?.data?.bookerId;
+          (g?.data?.members || []).forEach((m) => {
+            meta[String(m.userId)] = { isBooker: String(bookerId) === String(m.userId), profileImage: m.profileImage };
+          });
+        } catch { /* ignore */ }
+        if (!on) return;
+        const list = (r.data || []).filter((m) => !m.alreadyRated).map((m) => ({ ...m, ...(meta[String(m.userId)] || {}) }));
         setMembers(list);
         const init = {};
-        list.forEach((m) => { init[m.userId] = { reliability: 5, punctuality: 5, confirmed: true }; });
+        list.forEach((m) => { init[m.userId] = { reliability: 5, punctuality: 5 }; });
         setForm(init);
       })
       .finally(() => on && setLoading(false));
@@ -51,7 +68,7 @@ export default function Rate() {
     try {
       for (const m of members) {
         const v = form[m.userId];
-        await ratingsApi.submit({ groupId, toUser: m.userId, reliabilityStars: v.reliability, punctualityStars: v.punctuality, confirmed: v.confirmed });
+        await ratingsApi.submit({ groupId, toUser: m.userId, reliabilityStars: v.reliability, punctualityStars: v.punctuality, confirmed: true });
       }
       router.replace('/(tabs)/home');
     } catch (e) {
@@ -62,60 +79,57 @@ export default function Rate() {
   };
 
   return (
-    <View className="flex-1 bg-bg">
-      <ScreenHeader title="Rate Riders" testID="rate-header" />
+    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
+      <View style={{ paddingTop: 14, paddingBottom: 14, alignItems: 'center' }}>
+        <Text testID="rate-header" style={{ fontSize: 32, fontWeight: '800', color: INK, letterSpacing: -0.5 }}>Rate Riders</Text>
+        <Text style={{ fontSize: 15, color: SUB, marginTop: 4 }}>How was your ride with</Text>
+      </View>
+
       {loading ? (
-        <View className="flex-1 items-center justify-center"><ActivityIndicator color="#3AAFA9" size="large" /></View>
+        <View className="flex-1 items-center justify-center"><ActivityIndicator color={NAVY} size="large" /></View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingTop: 12, paddingBottom: insets.bottom + 24 }}>
-          <View className="flex-row items-center gap-1.5 mx-5 mb-3">
-            <ShieldCheck size={14} color="#8A8A9A" />
-            <Text className="text-[12px] text-text-3">Ratings are anonymous to the rated rider.</Text>
-          </View>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
           {members.length === 0 ? (
             <View className="items-center px-8 py-16">
-              <View className="w-20 h-20 rounded-full bg-primary-light items-center justify-center mb-4"><Star size={30} color="#3AAFA9" /></View>
-              <Text className="text-lg font-bold text-text mb-1">All set</Text>
-              <Text className="text-sm text-text-3 text-center">You&rsquo;ve rated everyone in this group.</Text>
+              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#E7EBEF', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                <Star size={30} color={NAVY} fill={NAVY} />
+              </View>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: INK, marginBottom: 4 }}>All set</Text>
+              <Text style={{ fontSize: 14, color: SUB, textAlign: 'center' }}>You&rsquo;ve rated everyone in this group.</Text>
             </View>
           ) : (
             members.map((m) => {
               const v = form[m.userId];
               return (
-                <View key={m.userId} className="mx-5 mb-3 rounded-[14px] bg-white p-4 border border-border" testID={`rate-card-${m.userId}`}>
-                  <View className="flex-row items-center gap-3 mb-3">
-                    <View className="w-10 h-10 rounded-full bg-primary-light items-center justify-center"><Text className="text-[13px] font-bold text-primary-dark">{m.initials}</Text></View>
-                    <Text className="text-[15px] font-bold text-text">{m.name}</Text>
-                  </View>
-                  <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-[13px] text-text-2">Reliability</Text>
-                    <Stars value={v.reliability} onChange={(n) => setField(m.userId, 'reliability', n)} testIDPrefix={`rate-rel-${m.userId}`} />
-                  </View>
-                  <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-[13px] text-text-2">Punctuality</Text>
-                    <Stars value={v.punctuality} onChange={(n) => setField(m.userId, 'punctuality', n)} testIDPrefix={`rate-pun-${m.userId}`} />
-                  </View>
-                  <View className="flex-row gap-2">
-                    <Pressable testID={`rate-confirmed-${m.userId}`} onPress={() => setField(m.userId, 'confirmed', true)} style={{ flex: 1 }} className={`flex-row items-center justify-center gap-1.5 py-2.5 rounded-[10px] border-[1.5px] ${v.confirmed ? 'bg-primary-light border-primary' : 'bg-white border-border'}`}>
-                      <Check size={15} color={v.confirmed ? '#2B8A85' : '#8A8A9A'} />
-                      <Text className={`text-[13px] font-semibold ${v.confirmed ? 'text-primary-dark' : 'text-text-3'}`}>Confirmed</Text>
-                    </Pressable>
-                    <Pressable testID={`rate-flaked-${m.userId}`} onPress={() => setField(m.userId, 'confirmed', false)} style={{ flex: 1 }} className={`flex-row items-center justify-center gap-1.5 py-2.5 rounded-[10px] border-[1.5px] ${!v.confirmed ? 'bg-accent-light border-accent' : 'bg-white border-border'}`}>
-                      <X size={15} color={!v.confirmed ? '#FF6B6B' : '#8A8A9A'} />
-                      <Text className={`text-[13px] font-semibold ${!v.confirmed ? 'text-accent' : 'text-text-3'}`}>Flaked</Text>
-                    </Pressable>
-                  </View>
+                <View key={m.userId} testID={`rate-card-${m.userId}`} className="rounded-[20px] bg-white p-5 items-center" style={[{ marginBottom: 22 }, CARD_SHADOW]}>
+                  {m.profileImage ? (
+                    <Image source={{ uri: m.profileImage }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+                  ) : (
+                    <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#E7EBEF', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 18, fontWeight: '800', color: NAVY }}>{m.initials}</Text>
+                    </View>
+                  )}
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: INK, marginTop: 10 }}>{m.name}</Text>
+                  {m.isBooker ? (
+                    <View style={{ backgroundColor: '#F8F1E7', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 3, marginTop: 6 }}>
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: '#C98A34' }}>BOOKER</Text>
+                    </View>
+                  ) : null}
+
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: SUB, letterSpacing: 0.8, marginTop: 22, marginBottom: 12 }}>RELIABILITY</Text>
+                  <Stars value={v.reliability} onChange={(n) => setField(m.userId, 'reliability', n)} testIDPrefix={`rate-rel-${m.userId}`} />
+
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: SUB, letterSpacing: 0.8, marginTop: 24, marginBottom: 12 }}>PUNCTUALITY</Text>
+                  <Stars value={v.punctuality} onChange={(n) => setField(m.userId, 'punctuality', n)} testIDPrefix={`rate-pun-${m.userId}`} />
                 </View>
               );
             })
           )}
-          {error ? <Text testID="rate-error" className="px-5 mb-2 text-[13px] text-accent">{error}</Text> : null}
+          {error ? <Text testID="rate-error" style={{ color: '#C0392B', fontSize: 13, marginBottom: 10, textAlign: 'center' }}>{error}</Text> : null}
           {members.length ? (
-            <View className="px-5">
-              <Pressable testID="rate-submit" onPress={submit} disabled={busy} className="w-full py-4 rounded-[14px] bg-primary items-center">
-                {busy ? <ActivityIndicator color="#fff" /> : <Text className="text-base font-semibold text-white">Submit Ratings</Text>}
-              </Pressable>
-            </View>
+            <Pressable testID="rate-submit" onPress={submit} disabled={busy} className="rounded-[14px] items-center justify-center" style={[{ backgroundColor: NAVY, paddingVertical: 17, marginTop: 4 }, CARD_SHADOW]}>
+              {busy ? <ActivityIndicator color="#fff" /> : <Text style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>Submit Ratings</Text>}
+            </Pressable>
           ) : null}
         </ScrollView>
       )}

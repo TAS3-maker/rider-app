@@ -89,7 +89,7 @@ export default function Home() {
   }, []));
 
   const renderRideCard = () => {
-    const airport = upcoming.airport || upcoming.airportCode || 'Airport';
+    const airport = (upcoming.airport && upcoming.airport.code) || upcoming.airportCode || 'Airport';
     const toAirport = upcoming.direction !== 'airport_to_university';
     const title = toAirport ? `Campus → ${airport}` : `${airport} → Campus`;
 

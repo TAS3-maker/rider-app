@@ -1,14 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, FlatList, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Image, FlatList, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { Send, Info, TrendingDown } from 'lucide-react-native';
+import { ArrowLeft, ArrowUp, Pin, ChevronDown, ChevronUp } from 'lucide-react-native';
 import { groupsApi } from '@/api/rides';
 import { chatApi } from '@/api/social';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
-import ScreenHeader from '@/components/ScreenHeader';
 import { formatTime, countdown } from '@/lib/format';
+
+const INK = '#1E2A38';
+const SUB = '#6B7480';
+const MUTED = '#9AA6B2';
+const NAVY = '#2C3A4B';
+const RED = '#D9524A';
+const CAMPUS = 'UMich';
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function initialsOf(name) {
+  if (!name) return '?';
+  const p = name.trim().split(/\s+/);
+  return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).toUpperCase();
+}
 
 export default function GroupChat() {
   const insets = useSafeAreaInsets();
@@ -24,6 +37,7 @@ export default function GroupChat() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [text, setText] = useState('');
+  const [expanded, setExpanded] = useState(true);
   const ids = useRef(new Set());
 
   const addMessages = useCallback((arr, toEnd) => {
@@ -38,7 +52,7 @@ export default function GroupChat() {
     const res = await chatApi.history(groupId, p, 20);
     setTotal(res.total);
     setPage(p);
-    addMessages(res.data, true); // history is newest-first → append after current
+    addMessages(res.data, true);
   }, [groupId, addMessages]);
 
   useFocusEffect(useCallback(() => {
@@ -48,9 +62,7 @@ export default function GroupChat() {
         const g = await groupsApi.get(groupId);
         if (on) setGroup(g.data);
         await loadPage(1);
-      } catch {
-        // ignore
-      } finally {
+      } catch { /* ignore */ } finally {
         if (on) setLoading(false);
       }
     })();
@@ -79,82 +91,118 @@ export default function GroupChat() {
     try {
       const res = await chatApi.send(groupId, t);
       addMessages([res.data], false);
-    } catch {
-      setText(t);
-    }
+    } catch { setText(t); }
   };
 
   const booked = group && ['confirmed', 'in_progress', 'completed'].includes(group.status);
-  const cd = group ? countdown(group.bookingDeadline) : { text: '', urgent: false };
+  const cd = group ? countdown(group.bookingDeadline) : { text: '', urgent: false, passed: false };
+  const code = group && group.airport ? group.airport.code : (group?.customDestinationName || 'DTW');
+  const route = group ? (group.direction === 'airport_to_university' ? `${code}  →  ${CAMPUS}` : `${CAMPUS}  →  ${code}`) : '';
+  const dateStr = group && group.travelDate ? `${MONTHS[new Date(group.travelDate).getMonth()]} ${new Date(group.travelDate).getDate()}` : '';
+
+  const onPinnedCTA = () => {
+    if (!group) return;
+    if (group.isCurrentUserBooker && !booked) groupsApi.book(groupId).then(() => router.push({ pathname: '/fare-split', params: { groupId } }));
+    else router.push({ pathname: '/fare-split', params: { groupId } });
+  };
 
   const renderItem = ({ item }) => {
     if (item.isSystemMessage) {
       return (
-        <View className="flex-row items-center justify-center my-2" testID="chat-system-msg">
-          <View className="flex-row items-center gap-1 bg-border/60 px-3 py-1.5 rounded-full">
-            <Info size={12} color="#8A8A9A" />
-            <Text className="text-[11px] text-text-3">{item.text}</Text>
-          </View>
+        <View className="items-center" style={{ marginVertical: 8 }} testID="chat-system-msg">
+          <Text style={{ fontSize: 12, color: MUTED }}>{item.text}</Text>
         </View>
       );
     }
     const mine = item.sender && String(item.sender.id) === String(user?.id);
+    const senderName = item.sender ? item.sender.name : 'Rider';
+    const senderBooker = group && item.sender && String(group.bookerId) === String(item.sender.id);
+    const img = item.sender && item.sender.profileImage;
+
+    const AvatarSmall = (
+      img ? <Image source={{ uri: img }} style={{ width: 34, height: 34, borderRadius: 17 }} />
+        : <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: mine ? '#3A4A5C' : '#E7EBEF', alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 11, fontWeight: '800', color: mine ? '#fff' : NAVY }}>{initialsOf(senderName)}</Text>
+          </View>
+    );
+
     return (
-      <View className={`px-4 my-1 ${mine ? 'items-end' : 'items-start'}`}>
-        {!mine && item.sender ? <Text className="text-[11px] text-text-3 mb-0.5 ml-1">{item.sender.name}</Text> : null}
-        <View className={`max-w-[78%] px-3.5 py-2.5 rounded-2xl ${mine ? 'bg-primary rounded-br-md' : 'bg-white border border-border rounded-bl-md'}`}>
-          <Text className={`text-[14px] ${mine ? 'text-white' : 'text-text'}`}>{item.text}</Text>
+      <View className={`flex-row ${mine ? 'justify-end' : 'justify-start'}`} style={{ paddingHorizontal: 16, marginVertical: 6 }}>
+        {!mine ? <View style={{ marginRight: 8, marginTop: 2 }}>{AvatarSmall}</View> : null}
+        <View style={{ maxWidth: '76%' }}>
+          <View
+            className="rounded-2xl"
+            style={[
+              { paddingHorizontal: 14, paddingVertical: 11 },
+              mine ? { backgroundColor: NAVY, borderBottomRightRadius: 6 } : { backgroundColor: '#fff', borderBottomLeftRadius: 6, shadowColor: '#2C3A4B', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 1 },
+            ]}
+          >
+            {mine ? <View style={{ position: 'absolute', left: -42, top: 0 }}>{AvatarSmall}</View> : null}
+            <Text style={{ fontSize: 14.5, lineHeight: 20, color: mine ? '#fff' : INK }}>{item.text}</Text>
+            <View className="flex-row items-center justify-end" style={{ marginTop: 5 }}>
+              <Text style={{ fontSize: 11, color: mine ? 'rgba(255,255,255,0.65)' : MUTED }}>{senderName}</Text>
+              {senderBooker ? (
+                <View style={{ backgroundColor: mine ? 'rgba(255,255,255,0.15)' : '#F8F1E7', borderRadius: 999, paddingHorizontal: 7, paddingVertical: 2, marginLeft: 6 }}>
+                  <Text style={{ fontSize: 10, fontWeight: '800', color: mine ? '#fff' : '#C98A34' }}>BOOKER</Text>
+                </View>
+              ) : null}
+            </View>
+          </View>
         </View>
       </View>
     );
   };
 
   return (
-    <View className="flex-1 bg-bg">
-      <ScreenHeader title="Group Chat" testID="chat-header" />
-      {/* Pinned ride info */}
+    <View className="flex-1 bg-bg" style={{ paddingTop: insets.top }}>
+      {/* Header */}
+      <View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: 6 }}>
+        <View className="flex-row items-center">
+          <Pressable testID="chat-back" onPress={() => router.back()} style={{ padding: 4, marginRight: 6 }}><ArrowLeft size={26} color={INK} /></Pressable>
+          <Text testID="chat-header" style={{ fontSize: 28, fontWeight: '800', color: INK, letterSpacing: -0.5 }}>{route}</Text>
+        </View>
+        {dateStr ? <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: '700', color: MUTED, marginTop: -2 }}>{dateStr}</Text> : null}
+      </View>
+
+      {/* Pinned Ride Details */}
       {group ? (
-        <View className="mx-4 mt-2 mb-1 rounded-[14px] bg-primary-light p-3 border border-primary/20" testID="chat-pinned">
-          <View className="flex-row justify-between mb-1">
-            <Text className="text-[12px] text-text-3">Depart</Text>
-            <Text className="text-[12px] font-bold text-text">~{formatTime(group.suggestedDeparture)}</Text>
-          </View>
-          <View className="flex-row justify-between mb-1">
-            <Text className="text-[12px] text-text-3">Book by</Text>
-            <Text className={`text-[12px] font-bold ${cd.urgent ? 'text-accent' : 'text-text'}`}>{formatTime(group.bookingDeadline)} {cd.text ? `(${cd.text})` : ''}</Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-[12px] text-text-3">{group.vehicleSuggestion || 'UberX'} · per person</Text>
-            <Text className="text-[12px] font-bold text-primary-dark">${group.perPerson}</Text>
-          </View>
-          {group.isCurrentUserBooker && !booked ? (
-            <Pressable
-              testID="chat-book-now"
-              onPress={() => groupsApi.book(groupId).then(() => router.push({ pathname: '/fare-split', params: { groupId } }))}
-              className="bg-primary rounded-lg py-2 items-center flex-row justify-center gap-1.5"
-            >
-              <TrendingDown size={14} color="#fff" />
-              <Text className="text-[12px] font-bold text-white">Save ~{group.savingsPct}% · Book Now</Text>
-            </Pressable>
-          ) : booked ? (
-            <Pressable
-              testID="chat-book-now"
-              onPress={() => router.push({ pathname: '/fare-split', params: { groupId } })}
-              className="bg-white border border-primary rounded-lg py-2 items-center flex-row justify-center gap-1.5"
-            >
-              <Text className="text-[12px] font-bold text-primary-dark">View Fare Split</Text>
-            </Pressable>
-          ) : (
-            <View className="rounded-lg py-2 items-center bg-white border border-border">
-              <Text className="text-[12px] font-semibold text-text-3">Waiting for the booker to book the cab</Text>
+        <View testID="chat-pinned" className="rounded-[16px]" style={{ marginHorizontal: 16, marginBottom: 4, backgroundColor: '#E7EDF3', borderWidth: 1, borderColor: '#D3DEE8', padding: 14 }}>
+          <Pressable className="flex-row items-center justify-between" onPress={() => setExpanded((e) => !e)}>
+            <View className="flex-row items-center">
+              <Pin size={16} color={INK} />
+              <Text style={{ fontSize: 15, fontWeight: '800', color: INK, marginLeft: 8 }}>Ride Details</Text>
             </View>
-          )}
+            {expanded ? <ChevronDown size={20} color={INK} /> : <ChevronUp size={20} color={INK} />}
+          </Pressable>
+          {expanded ? (
+            <View style={{ marginTop: 10 }}>
+              <View className="flex-row justify-between" style={{ marginBottom: 5 }}>
+                <Text style={{ fontSize: 14, color: SUB }}>Depart</Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: INK }}>~{formatTime(group.suggestedDeparture)}</Text>
+              </View>
+              <View className="flex-row justify-between" style={{ marginBottom: 5 }}>
+                <Text style={{ fontSize: 14, color: SUB }}>Book By</Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: cd.urgent ? RED : INK }}>{formatTime(group.bookingDeadline)}</Text>
+              </View>
+              <View className="flex-row justify-between" style={{ marginBottom: 5 }}>
+                <Text style={{ fontSize: 14, color: SUB }}>Vehicle</Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: INK }}>{group.vehicleSuggestion || 'UberX'}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text style={{ fontSize: 14, color: SUB }}>Est. fare</Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: INK }}>${group.perPerson}/person</Text>
+              </View>
+              <Pressable testID="chat-book-now" onPress={onPinnedCTA} className="rounded-[12px] items-center justify-center" style={{ backgroundColor: '#fff', paddingVertical: 13, marginTop: 12, shadowColor: '#2C3A4B', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 2 }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: INK }}>{booked ? 'View Fare Split' : `Save ~${group.savingsPct || 0}% vs $${group.soloFareEstimate} Riding Solo`}</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       ) : null}
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1" keyboardVerticalOffset={insets.top + 56}>
         {loading ? (
-          <View className="flex-1 items-center justify-center"><ActivityIndicator color="#3AAFA9" /></View>
+          <View className="flex-1 items-center justify-center"><ActivityIndicator color={NAVY} /></View>
         ) : (
           <FlatList
             testID="chat-list"
@@ -165,21 +213,28 @@ export default function GroupChat() {
             contentContainerStyle={{ paddingVertical: 10 }}
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
-            ListFooterComponent={loadingMore ? <ActivityIndicator color="#3AAFA9" style={{ marginVertical: 12 }} /> : null}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={loadingMore ? <ActivityIndicator color={NAVY} style={{ marginVertical: 12 }} /> : null}
           />
         )}
-        <View className="flex-row items-center gap-2 px-3 py-2 bg-white border-t border-border" style={{ paddingBottom: insets.bottom + 8 }}>
+
+        {!booked && cd.text && !cd.passed ? (
+          <Text testID="chat-deadline" style={{ textAlign: 'center', fontSize: 13, color: RED, paddingVertical: 8 }}>Booking deadline: {cd.text.replace(' left', '')} remaining</Text>
+        ) : null}
+
+        <View className="flex-row items-center" style={{ gap: 10, paddingHorizontal: 16, paddingTop: 8, backgroundColor: 'transparent', paddingBottom: insets.bottom + 10 }}>
           <TextInput
             testID="chat-input"
             value={text}
             onChangeText={setText}
             placeholder="Type a message..."
-            placeholderTextColor="#8A8A9A"
-            className="flex-1 px-4 py-2.5 rounded-full bg-bg text-[14px] text-text"
+            placeholderTextColor={MUTED}
+            className="flex-1 rounded-full"
+            style={{ paddingHorizontal: 18, paddingVertical: 12, backgroundColor: '#EDEEF0', fontSize: 15, color: INK }}
             onSubmitEditing={send}
           />
-          <Pressable testID="chat-send" onPress={send} className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-            <Send size={18} color="#fff" />
+          <Pressable testID="chat-send" onPress={send} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: NAVY, alignItems: 'center', justifyContent: 'center' }}>
+            <ArrowUp size={20} color="#fff" />
           </Pressable>
         </View>
       </KeyboardAvoidingView>

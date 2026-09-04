@@ -153,6 +153,17 @@ multi-language, external CRM.
 ### Phase 4 — Testing & Launch (P1)
 - Full QA, edge cases, production config, store submission support.
 
+## Rovo pixel-perfect redesign — Part 3 (DONE, verified)
+- UI-only (no backend changes) redesign of 5 screens, matched to mockups + E2E validated:
+  - Rate Riders (rate.jsx): centered title, per-member card w/ avatar + BOOKER pill + RELIABILITY/PUNCTUALITY tap-to-select navy stars, Submit Ratings.
+  - Fare Split RIDER (fare-split.jsx): dark navy "Ride Complete" hero (RovoCar/RovoCloud), FARE SPLIT card w/ per-rider %/amount, Copy-Pay button, PAYMENT STATUS PAID/PENDING, "I've Paid → Continue to Rating".
+  - Fare Split BOOKER (fare-split.jsx): "← Fare Split", navy "Ride Complete" banner, big $ ENTER ACTUAL FARE input, rider rows, Confirm & Send Split, PAYMENT TRACKING w/ Mark Received.
+  - Group Chat (group-chat.jsx): route+date header, collapsible pinned Ride Details card, left/right bubbles w/ avatars + BOOKER tag, red booking-deadline line, rounded input + navy ArrowUp send.
+  - Group Details BOOKER (group.jsx): summary card, Pickup Mode toggle (local UI state), RIDERS w/ addresses + star, Copy All Addresses, Book Ride Now, "or Open Group Chat →".
+- Fixes from test iteration 9: Rate BOOKER pill enriched client-side via groupsApi.get (no backend change); Home "YOUR UPCOMING RIDE" airport now uses airport.code (was rendering [object Object]).
+- Chevron on Ride Details kept as ▼-when-expanded to match the mockup (intentional).
+- Reused RovoCar/RovoCloud + existing endpoints (groupsApi, faresApi, ratingsApi, chatApi). admin-web/matching/lifecycle untouched.
+
 ## Rovo pixel-perfect redesign — Part 2 (DONE, verified)
 - Screens rebuilt to match mockups: Create Ride (Path A UMich→DTW), Create Ride (Path B DTW→UMich
   with DTW Terminal selector), Private Group (Invite Friends: DTW vs Custom Destination),
